@@ -1,0 +1,7 @@
+K vs K (side to move): {"WIN":368,"LOSS":8,"DRAW":3236}; forced wins that are NOT an immediate Royal Capture: 32
+  deepest K-vs-K win: Kd1 vs Ka1, side to move wins in 2 plies
+K+N vs K, White to move: WIN 99.9%  LOSS 0.0%  DRAW 0.1%  (n=205496); longest forced win 36 plies e.g. WKa1 Nc1 BKc2
+K+N vs K, Black to move: WIN 9.2%  LOSS 81.8%  DRAW 9.0%  (n=223944); longest forced win 2 plies e.g. WKa1 Nc2 BKd1
+K+B vs K, White to move: WIN 100.0%  LOSS 0.0%  DRAW 0.0%  (n=193284); longest forced win 22 plies e.g. WKa1 Be1 BKd1
+K+B vs K, Black to move: WIN 9.2%  LOSS 82.4%  DRAW 8.4%  (n=223944); longest forced win 2 plies e.g. WKa1 Bc2 BKd1
+spot-check Ka1(b) vs Kc2(w), Black to move = LOSS

@@ -1,0 +1,174 @@
+
+### A1 Royal Capture setup (Black to move, Kf3 walks into the Kill Zone)
+  8/8/8/8/4k3/8/8/7K b - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 8 moves | MEAN: ongoing
+  ordinary: Kd5 Ke5 Kf5 Kf4 Kf3[suicidal] Ke3 Kd3 Kd4
+
+### A2 ...after 1...Kf3: White to move
+  8/8/8/8/8/5k2/8/7K w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 2 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL CAPTURE Kh1xf3
+  ordinary: Kh2 Kg1
+
+### A3 Royal Capture while in ordinary check (handoff s.11)
+  8/8/8/8/8/5k2/8/r6K w - - 0 1
+  legal-at-this-turn: yes | standard: check, 1 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL CAPTURE Kh1xf3
+  ordinary: Kh2
+
+### A4 Distance 3: no capture
+  8/8/8/8/8/8/8/K2k4 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 3 moves | MEAN: ongoing
+  ordinary: Ka2 Kb2 Kb1[suicidal]
+
+### A5 Knight-shaped distance 2 = safe stand-off; corner zugzwang
+  8/8/8/8/8/8/2k5/K7 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 1 moves | MEAN: ongoing
+  ordinary: Ka2[suicidal]
+
+### B1 Slaughter through pawn (vertical)
+  8/8/8/8/8/4k3/4P3/4K3 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 2 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Ke1xe3 (eats own P on e2)
+  ordinary: Kf1 Kd1
+
+### B2 Same, Black to move: blocked by enemy pawn
+  8/8/8/8/8/4k3/4P3/4K3 b - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 3 moves | MEAN: ongoing
+  ordinary: Kd4 Ke4 Kf4
+
+### B3 Knight blocker while a pawn exists elsewhere: NO slaughter
+  8/8/8/8/8/4k3/P3N3/4K3 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 10 moves | MEAN: ongoing
+  suicidal ordinary: Nc3 Nd4 Nf4 Ng3 Ng1 Nc1 (of 10)
+
+### B4 Knight blocker, no pawns: slaughter
+  8/8/8/8/8/4k3/4N3/4K3 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 8 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Ke1xe3 (eats own N on e2)
+  ordinary: Nc3[suicidal] Nd4[suicidal] Nf4[suicidal] Ng3[suicidal] Ng1[suicidal] Nc1[suicidal] Kf1 Kd1
+
+### B5 Bishop blocker on a file, no pawns: slaughter
+  8/8/8/8/8/4k3/4B3/4K3 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 11 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Ke1xe3 (eats own B on e2)
+  suicidal ordinary: Bd3 Bc4 Bb5 Ba6 Bf3 Bg4 Bh5 Bf1 Bd1 (of 11)
+
+### B6 Rook blocker on a diagonal, rook tier: slaughter
+  8/8/8/8/8/4k3/3R4/2K5 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 18 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Kc1xe3 (eats own R on d2)
+  suicidal ordinary: Rd3+ Rd4 Rd5 Rd6 Rd7 Rd8 Re2+ Rf2 Rg2 Rh2 Rd1 Rc2 Rb2 Ra2 (of 18)
+
+### B7 Rook blocker while a knight exists: NO slaughter
+  8/8/8/8/8/4k3/3R4/2K4N w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 20 moves | MEAN: ongoing
+  suicidal ordinary: Rd3+ Rd4 Rd5 Rd6 Rd7 Rd8 Re2+ Rf2 Rg2 Rh2 Rd1 Rc2 Rb2 Ra2 (of 20)
+
+### B8 Enemy knight between kings (White to move): no capture
+  8/8/8/8/8/4k3/4n3/4K3 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 2 moves | MEAN: ongoing
+  ordinary: Kf1 Kd1
+
+### B9 Same, Black to move: Black slaughters through its own knight
+  8/8/8/8/8/4k3/4n3/4K3 b - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 11 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Ke3xe1 (eats own N on e2)
+  suicidal ordinary: Nc3 Nd4 Nf4 Ng3 Ng1 Nc1 (of 11)
+
+### B10 Promoted queen between kings: ILLEGAL position (queen gives check)
+  8/8/8/8/8/4k3/4Q~3/4K3 w - - 0 1
+  legal-at-this-turn: NO (side not to move is in check) | standard: ongoing, 19 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Ke1xe3 (eats own Q~ on e2)
+  suicidal ordinary: Qd3+ Qc4 Qb5 Qa6 Qf3+ Qg4 Qh5 Qf2+ Qg2 Qh2 Qf1 Qd1 Qd2+ Qc2 Qb2 Qa2 (of 19)
+
+### B11 Pawn on its capture diagonal between kings: ILLEGAL (pawn gives check)
+  8/8/8/8/8/4k3/3P4/2K5 w - - 0 1
+  legal-at-this-turn: NO (side not to move is in check) | standard: ongoing, 7 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Kc1xe3 (eats own P on d2)
+  ordinary: d3[suicidal] d4[suicidal] dxe3 Kb2+ Kc2+ Kd1+ Kb1+
+
+### B12 Pawn diagonal the other way: slaughter
+  8/8/8/8/8/4K3/3P4/2k5 w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 9 moves | MEAN: ROYAL WIN AVAILABLE
+  royal: ROYAL SLAUGHTER Ke3xc1 (eats own P on d2)
+  suicidal ordinary: d3 d4 (of 9)
+
+### C1 Back-rank mate -> pawn cannibalism
+  k7/8/8/8/8/8/5PPP/4r1K1 w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: DESPERATE (cannibalism available)
+  cannibalism: Kg1xf2(own P), Kg1xg2(own P), Kg1xh2(own P)
+
+### C2 Back-rank, f2 covered by a bishop -> only g2/h2
+  k7/8/8/2b5/8/8/5PPP/4r1K1 w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: DESPERATE (cannibalism available)
+  cannibalism: Kg1xg2(own P), Kg1xh2(own P)
+
+### C3 Smothered by own minors, no pawns -> minor cannibalism
+  4k3/8/8/8/8/8/5nBB/6NK w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: DESPERATE (cannibalism available)
+  cannibalism: Kh1xg1(own N), Kh1xg2(own B), Kh1xh2(own B)
+
+### C4 Same + a pawn on a2 -> hierarchy blocks -> MEAN CHECKMATE
+  4k3/8/8/8/8/8/P4nBB/6NK w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: CHECKMATE
+  cannibalism: none legal
+
+### C5 Rook tier (double check)
+  b2k4/8/8/8/8/8/5n1R/6RK w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: DESPERATE (cannibalism available)
+  cannibalism: Kh1xg1(own R), Kh1xh2(own R)
+
+### C6 Rook tier blocked by a knight elsewhere -> MEAN CHECKMATE
+  b2k4/8/8/8/8/8/5n1R/N5RK w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: CHECKMATE
+  cannibalism: none legal
+
+### C7 Promoted queen tier
+  b2k4/8/8/8/7r/8/8/6Q~K w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: DESPERATE (cannibalism available)
+  cannibalism: Kh1xg1(own Q~)
+
+### C8 Original queen trap -> MEAN CHECKMATE
+  b2k4/8/8/8/7r/8/8/6QK w - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: CHECKMATE
+  cannibalism: none legal
+
+### C9 Only escape is suicidal -> cannibalism allowed (founder decision)
+  8/8/8/8/5k2/8/6P1/r6K w - - 0 1
+  legal-at-this-turn: yes | standard: check, 1 moves | MEAN: DESPERATE (cannibalism available)
+  ordinary: Kh2[suicidal]
+  cannibalism: Kh1xg2(own P)
+
+### C10 Fool's mate is not mate
+  rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: DESPERATE (cannibalism available)
+  cannibalism: Ke1xd2(own P), Ke1xe2(own P)
+
+### C11 Scholar's mate still mates
+  r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: CHECKMATE
+  cannibalism: none legal
+
+### C12 Smothered mate (Nf7#) -> pawn cannibalism
+  6rk/5Npp/8/8/8/8/8/K7 b - - 0 1
+  legal-at-this-turn: yes | standard: checkmate, 0 moves | MEAN: DESPERATE (cannibalism available)
+  cannibalism: Kh8xg7(own P), Kh8xh7(own P)
+
+### G1 Capturing the last enemy pawn arms their Royal Slaughter (Rxh7 suicidal)
+  8/7p/8/8/8/4k3/4n3/4K2R w - - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 10 moves | MEAN: ongoing
+  suicidal ordinary: Rxh7 (of 10)
+
+### D1 Castling into the Kill Zone is legal (and suicidal)
+  8/8/8/8/8/6k1/P4N2/4K2R w K - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 21 moves | MEAN: ongoing
+  suicidal ordinary: Nd3 Ne4+ Ng4 Nh3 Nd1 O-O (of 21)
+
+### D2 Castling through a square adjacent to the enemy king: illegal
+  8/8/8/8/8/8/P4Nk1/4K2R w K - 0 1
+  legal-at-this-turn: yes | standard: ongoing, 19 moves | MEAN: ongoing
+
+### E1 Stalemate with an eatable pawn: still stalemate
+  K7/P7/8/8/8/4k3/8/1r6 w - - 0 1
+  legal-at-this-turn: yes | standard: stalemate, 0 moves | MEAN: STALEMATE

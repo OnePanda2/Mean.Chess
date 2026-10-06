@@ -1,0 +1,13 @@
+# Store and check out every text file with LF line endings, regardless of the
+# machine's core.autocrlf setting (the main dev machine is Windows with autocrlf=true).
+* text=auto eol=lf
+
+# Binary assets
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
