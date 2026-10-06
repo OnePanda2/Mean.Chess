@@ -40,7 +40,7 @@ export interface Explanation {
   readonly detail: string
 }
 
-export function pieceName(piece: Piece | undefined): string {
+export function pieceName(piece: Piece | null | undefined): string {
   if (!piece) return 'piece'
   if (piece.type === 'queen') return piece.queenOrigin === 'promoted' ? 'promoted queen' : 'queen'
   return piece.type

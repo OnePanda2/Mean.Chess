@@ -13,12 +13,3 @@ export function findKing(board: Board, color: Color): Square | null {
   }
   return null
 }
-
-/** Every square holding a piece of `color`, in square order. */
-export function squaresOf(board: Board, color: Color): Square[] {
-  const result: Square[] = []
-  for (let sq = 0; sq < 64; sq++) {
-    if (board[sq]?.color === color) result.push(sq)
-  }
-  return result
-}

@@ -39,6 +39,12 @@ describe('game record', () => {
     expect(undo(game)).toBe(game)
   })
 
+  it('ignores a resignation or draw offer once the game is over', () => {
+    const over = resign(newGame(), 'white')
+    expect(resign(over, 'black')).toBe(over)
+    expect(agreeDraw(over)).toBe(over)
+  })
+
   it('records resignation and agreed draws, and lets undo withdraw them', () => {
     const game = play(newGame(), 'e2e4')
     expect(resign(game, 'white').outcome).toEqual({ kind: 'resignation', winner: 'black' })

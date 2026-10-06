@@ -27,6 +27,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/engine/**/*.ts'],
+      // docs/BLUEPRINT.md §6.1: the rules engine is the highest-risk code.
+      thresholds: { lines: 95, functions: 95, statements: 95, branches: 90 },
     },
   },
 })

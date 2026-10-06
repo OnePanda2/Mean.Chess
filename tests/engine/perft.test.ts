@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { perft, perftDetailed } from '../../src/engine/index.ts'
+import { perft, perftDetailed, perftDivide } from '../../src/engine/index.ts'
 import { PERFT_POSITIONS } from './fixtures.ts'
 import { position } from './helpers.ts'
 
@@ -75,5 +75,27 @@ describe('perft counters', () => {
       checks: 10,
       checkmates: 0,
     })
+  })
+})
+
+describe('perftDivide', () => {
+  it('splits the start position at depth 2 into 20 moves of 20 replies', () => {
+    const divide = perftDivide(position(PERFT_POSITIONS.start), 2)
+    expect(divide.size).toBe(20)
+    expect([...divide.values()].every((nodes) => nodes === 20)).toBe(true)
+  })
+
+  it('gives a royal move no subtree, because it ends the game', () => {
+    expect(Object.fromEntries(perftDivide(position('8/8/8/8/8/5k2/8/7K w - - 0 1'), 2))).toEqual({
+      h1f3: 0,
+      h1g1: 6,
+      h1h2: 6,
+    })
+  })
+
+  it('counts one node per move at depth 1, and the position itself at depth 0', () => {
+    expect([...perftDivide(position(PERFT_POSITIONS.start), 1).values()].every((nodes) => nodes === 1)).toBe(true)
+    expect(perft(position(PERFT_POSITIONS.start), 0)).toBe(1)
+    expect(perftDetailed(position(PERFT_POSITIONS.start), 0).nodes).toBe(1)
   })
 })
