@@ -27,7 +27,7 @@ export { findKing, pieceAt } from './board.ts'
 export { isInCheck, isSquareAttacked } from './attacks.ts'
 export { applyMove } from './apply.ts'
 export { TIER_NAMES, activeTier, isEligible, tierOf } from './hierarchy.ts'
-export { blockedRoyal, royalMove, type BlockReason, type BlockedRoyal } from './royalCapture.ts'
+export { blockedRoyal, royalMove, royalReach, type BlockReason, type BlockedRoyal } from './royalCapture.ts'
 export { legalMoves, moveLayers, ordinaryLegalMoves, type MoveLayers } from './legalMoves.ts'
 export {
   analyze,

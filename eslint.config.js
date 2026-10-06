@@ -33,6 +33,8 @@ export default defineConfig([
     },
     rules: {
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      // React handlers like onClick={() => setOpen(false)} are clearer as arrow shorthands.
+      '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
     },
   },
 

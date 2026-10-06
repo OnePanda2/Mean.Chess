@@ -36,6 +36,22 @@ export function royalMove(board: Board, side: Color): Move | null {
   return null
 }
 
+/**
+ * The squares `side`'s king could capture on (Rules §2.3), whatever stands there: royal distance
+ * with a passable midpoint (empty, or one of `side`'s eligible pieces). An enemy king standing on
+ * one of them can be captured; it is the visual "Royal Kill Zone" of `side`'s king.
+ */
+export function royalReach(board: Board, side: Color): Square[] {
+  const from = findKing(board, side)
+  if (from === null) return []
+  return royalLines(from)
+    .filter(({ midpoint }) => {
+      const blocker = board[midpoint]
+      return !blocker || (blocker.color === side && isEligible(board, blocker))
+    })
+    .map(({ target }) => target)
+}
+
 export type BlockReason = 'enemy-piece' | 'original-queen' | 'not-eligible'
 
 /** Why the kings stand at royal distance but `side` has no royal move, for explanations. */

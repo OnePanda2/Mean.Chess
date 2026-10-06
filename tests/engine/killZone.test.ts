@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { analyze, applyMove, isInCheck, legalMoves, toUci } from '../../src/engine/index.ts'
+import { analyze, applyMove, isInCheck, legalMoves, royalReach, squareName, toUci } from '../../src/engine/index.ts'
 import { fen, legal, position } from './helpers.ts'
 
 const suicidal = (text: string): string[] =>
@@ -49,5 +49,21 @@ describe('the Royal Kill Zone is legal but dangerous (Rules §2.2)', () => {
     const blackToMove = analyze(position(fen({ e1: 'K', e2: 'P', e3: 'k' }, 'b')))
     expect(blackToMove.threat?.kind).toBe('royal-slaughter')
     expect(blackToMove.royal).toBeNull()
+  })
+})
+
+describe('royal reach (the squares a king could capture on)', () => {
+  it('covers the 8 straight-line squares two away from an unobstructed king', () => {
+    const reach = royalReach(position(fen({ d4: 'K', h8: 'k' })).board, 'white').map(squareName).sort()
+    expect(reach).toEqual(['b2', 'b4', 'b6', 'd2', 'd6', 'f2', 'f4', 'f6'])
+  })
+
+  it('is cut by blockers, except an own eligible piece', () => {
+    // c5 holds a white pawn (eligible: passable); e4 holds a black knight (blocks); d5 holds a white
+    // bishop that is not eligible while a pawn exists (blocks).
+    const reach = royalReach(position(fen({ d4: 'K', c5: 'P', e4: 'n', d5: 'B', h8: 'k' })).board, 'white')
+      .map(squareName)
+      .sort()
+    expect(reach).toEqual(['b2', 'b4', 'b6', 'd2', 'f2', 'f6'])
   })
 })

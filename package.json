@@ -20,6 +20,7 @@
     "perft": "node tools/perft.ts"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

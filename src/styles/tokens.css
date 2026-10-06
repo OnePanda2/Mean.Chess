@@ -1,25 +1,34 @@
+/* Self-hosted display face (SIL OFL 1.1). Latin, bold only: ~22 KB. */
+@import '@fontsource/cormorant-garamond/latin-700.css';
+
 /* Design tokens. Direction: dark, premium, restrained (docs/BLUEPRINT.md §5.6).
-   Crimson always means royal / check / danger; brass always means sacrifice. */
+   Two accents, one meaning each: crimson = royal, check, danger; brass = sacrifice and focus. */
 :root {
   color-scheme: dark;
 
-  --bg: #0d0d0f;
-  --surface: #16161a;
-  --surface-raised: #1e1e24;
-  --border: #2a2a31;
+  --bg: #0b0b0d;
+  --surface: #16161b;
+  --surface-raised: #1f1f26;
+  --border: #2b2b34;
+  --border-strong: #3b3b47;
 
   --text: #ece7de;
-  --text-muted: #9a958c;
+  --text-muted: #a8a197;
 
-  --square-light: #cfc8bb;
-  --square-dark: #5f574d;
+  --square-light: #d6cebf;
+  --square-dark: #6e6457;
 
-  --crimson: #c4122f;
-  --brass: #c8a24a;
+  --crimson: #d7263f;
+  --crimson-soft: rgb(215 38 63 / 0.16);
+  --brass: #d0ab52;
+  --brass-soft: rgb(208 171 82 / 0.18);
 
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --font-display: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 
-  --radius: 10px;
+  --radius: 14px;
+  --radius-small: 9px;
   --gutter: 16px;
+  --page-width: 1240px;
+  --shadow: 0 18px 40px rgb(0 0 0 / 0.5);
 }
