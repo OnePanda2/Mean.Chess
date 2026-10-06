@@ -68,6 +68,9 @@ export interface Move {
   readonly sacrificed?: Piece
   /** Where the sacrificed piece stood: `to` for a self-capture, the midpoint for a royal slaughter. */
   readonly sacrificeSquare?: Square
-  /** Ordinary moves only: after this move the opponent has a royal move (Rules §2.2). */
+  /**
+   * True when, after this move, the opponent has a royal move (Rules §2.2). Set on ordinary and
+   * cannibalism moves; absent means safe. Royal moves end the game and never carry it.
+   */
   readonly suicidal?: boolean
 }
