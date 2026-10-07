@@ -1,12 +1,19 @@
 /* Page chrome */
 .topbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px 16px;
   max-width: var(--page-width);
   margin: 0 auto;
   padding: 14px var(--gutter);
+}
+
+/* If the bar still doesn't fit (a very narrow phone, large text), the menu wraps under the brand
+   instead of running off-screen. */
+.topbar > nav {
+  margin-left: auto;
 }
 
 .topbar__brand {
@@ -26,7 +33,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .topbar__brand {
     font-size: 1.1rem;
     letter-spacing: 0.1em;
@@ -35,6 +42,11 @@
   .topbar__nav {
     gap: 12px;
     font-size: 0.85rem;
+  }
+
+  /* The footer links to the source too. Phones need the room for the theme button. */
+  .topbar__source {
+    display: none;
   }
 }
 
@@ -534,7 +546,7 @@
   height: 18px;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .topbar__theme span {
     position: absolute;
     width: 1px;

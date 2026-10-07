@@ -24,7 +24,7 @@ export function TopBar({ current, onTheme }: { readonly current: 'play' | 'rules
               Rules
             </a>
           </li>
-          <li>
+          <li className="topbar__source">
             <a href={REPOSITORY} rel="noopener noreferrer">
               Source
             </a>
