@@ -1,0 +1,110 @@
+import { useState } from 'react'
+import { LEVELS, type Level } from '../ai/levels.ts'
+import { FRIEND, LEVEL_TEXT, type Opponent } from '../app/opponent.ts'
+import type { Color } from '../engine/index.ts'
+import { Modal } from './Modal.tsx'
+
+type Side = Color | 'random'
+
+const SIDES: readonly { readonly value: Side; readonly label: string }[] = [
+  { value: 'white', label: 'White' },
+  { value: 'black', label: 'Black' },
+  { value: 'random', label: 'Random' },
+]
+
+/** Choose who to play: a friend on this device, or the computer at a level and side. */
+export function NewGameDialog({
+  initial,
+  replacing,
+  onStart,
+  onClose,
+}: {
+  /** Preselected choices: usually the current opponent. */
+  readonly initial: Opponent
+  /** A game is in progress and will be replaced. */
+  readonly replacing: boolean
+  readonly onStart: (opponent: Opponent) => void
+  readonly onClose: () => void
+}) {
+  const [kind, setKind] = useState<Opponent['kind']>(initial.kind)
+  const [level, setLevel] = useState<Level>(initial.kind === 'computer' ? initial.level : 'mean')
+  const [side, setSide] = useState<Side>(initial.kind === 'computer' ? initial.human : 'white')
+
+  return (
+    <Modal title="New game" onClose={onClose}>
+      <form
+        className="new-game"
+        onSubmit={(event) => {
+          event.preventDefault()
+          if (kind === 'friend') {
+            onStart(FRIEND)
+            return
+          }
+          const human: Color = side === 'random' ? (Math.random() < 0.5 ? 'white' : 'black') : side
+          onStart({ kind: 'computer', level, human })
+        }}
+      >
+        <fieldset className="choice">
+          <legend>Opponent</legend>
+          <label className="choice__option">
+            <input type="radio" name="opponent" checked={kind === 'computer'} onChange={() => setKind('computer')} />
+            <span className="choice__text">
+              <strong>The computer</strong>
+              <span>Play against Mean Chess’s own AI.</span>
+            </span>
+          </label>
+          <label className="choice__option">
+            <input type="radio" name="opponent" checked={kind === 'friend'} onChange={() => setKind('friend')} />
+            <span className="choice__text">
+              <strong>A friend</strong>
+              <span>Two players taking turns on this device.</span>
+            </span>
+          </label>
+        </fieldset>
+
+        {kind === 'computer' && (
+          <>
+            <fieldset className="choice">
+              <legend>Difficulty</legend>
+              {LEVELS.map((option) => (
+                <label key={option} className="choice__option">
+                  <input type="radio" name="level" checked={level === option} onChange={() => setLevel(option)} />
+                  <span className="choice__text">
+                    <strong>{LEVEL_TEXT[option].name}</strong>
+                    <span>{LEVEL_TEXT[option].description}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+            <fieldset className="choice choice--inline">
+              <legend>You play</legend>
+              {SIDES.map((option) => (
+                <label key={option.value} className="choice__option">
+                  <input
+                    type="radio"
+                    name="side"
+                    checked={side === option.value}
+                    onChange={() => setSide(option.value)}
+                  />
+                  <span className="choice__text">
+                    <strong>{option.label}</strong>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          </>
+        )}
+
+        {replacing && <p className="muted small">Your current game will be replaced.</p>}
+        <div className="row">
+          <button type="submit" className="button button--primary">
+            Start game
+          </button>
+          <button type="button" className="button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </Modal>
+  )
+}

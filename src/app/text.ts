@@ -1,4 +1,5 @@
 import type { Color, Outcome, PositionAnalysis } from '../engine/index.ts'
+import type { Opponent } from './opponent.ts'
 
 /** Player-facing copy (docs/BLUEPRINT.md §5.3). Plain text only. */
 
@@ -37,6 +38,21 @@ export function outcomeMessage(outcome: Outcome): Message {
     case 'agreement':
       return { title: 'Draw', detail: 'Agreed by both players.' }
   }
+}
+
+/** The result's headline: "White wins", or against the computer "You win" / "The computer wins". */
+export function outcomeTitle(outcome: Outcome, opponent: Opponent): string {
+  if (opponent.kind === 'friend' || outcome.winner === null) return outcomeMessage(outcome).title
+  return outcome.winner === opponent.human ? 'You win' : 'The computer wins'
+}
+
+/** Why the game ended, worded for who was playing. */
+export function outcomeDetail(outcome: Outcome, opponent: Opponent): string {
+  if (opponent.kind === 'computer') {
+    if (outcome.kind === 'agreement') return 'You and the computer agreed to a draw.'
+    if (outcome.kind === 'resignation') return 'You resigned.'
+  }
+  return outcomeMessage(outcome).detail
 }
 
 export type StatusTone = 'win' | 'sacrifice' | 'check'

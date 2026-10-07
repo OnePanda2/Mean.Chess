@@ -625,3 +625,132 @@
 .small {
   font-size: 0.82rem;
 }
+
+/* New game dialog: each choice is a card around a native radio button. */
+.new-game {
+  display: grid;
+  gap: 16px;
+}
+
+.choice {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice legend {
+  margin-bottom: 8px;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.choice--inline {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface-raised);
+  cursor: pointer;
+}
+
+.choice__option:hover {
+  border-color: var(--gold);
+}
+
+.choice__option:has(input:checked) {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold);
+}
+
+.choice__option input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--gold);
+}
+
+.choice--inline .choice__option {
+  align-items: center;
+}
+
+.choice--inline .choice__option input {
+  margin-top: 0;
+}
+
+.choice__text {
+  display: grid;
+  gap: 2px;
+}
+
+.choice__text span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Status: who the player faces, and the computer thinking. */
+.matchup {
+  margin: -4px 0 10px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.matchup strong {
+  color: var(--text);
+}
+
+.thinking {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 2px;
+}
+
+.thinking span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: thinking 1.2s ease-in-out infinite;
+}
+
+.thinking span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.thinking span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes thinking {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking span {
+    animation: none;
+    opacity: 0.7;
+  }
+}

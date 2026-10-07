@@ -6,7 +6,8 @@ import {
   type Piece,
   type PositionAnalysis,
 } from '../engine/index.ts'
-import { outcomeMessage, sideName, statusOf } from '../app/text.ts'
+import { LEVEL_TEXT, type Opponent } from '../app/opponent.ts'
+import { outcomeDetail, outcomeTitle, sideName, statusOf } from '../app/text.ts'
 import { PieceImage } from './PieceImage.tsx'
 
 const tierText = (tier: PositionAnalysis['activeTiers'][Color]): string => (tier === null ? 'nothing' : TIER_NAMES[tier])
@@ -16,24 +17,57 @@ export function StatusPanel({
   analysis,
   sideToMove,
   hint,
+  opponent,
+  thinking,
+  notice,
 }: {
   readonly game: GameRecord
   readonly analysis: PositionAnalysis
   readonly sideToMove: Color
   readonly hint: Explanation | null
+  readonly opponent: Opponent
+  /** The computer is choosing its move. */
+  readonly thinking: boolean
+  /** A short message from the computer, such as a declined draw offer. */
+  readonly notice: string | null
 }) {
-  const status = game.outcome ? null : statusOf(analysis)
-  const result = game.outcome ? outcomeMessage(game.outcome) : null
+  const yourTurn = opponent.kind === 'friend' || opponent.human === sideToMove
+  // Status messages speak to the player about their own king, so only on their turn.
+  const status = game.outcome || !yourTurn ? null : statusOf(analysis)
+  const turn = game.outcome
+    ? 'Game over'
+    : opponent.kind === 'friend'
+      ? `${sideName(sideToMove)} to move`
+      : yourTurn
+        ? 'Your move'
+        : 'The computer is thinking'
   return (
     <section className="card status-card" aria-label="Game status">
       <p className="turn">
         <span className={`turn__disc turn__disc--${game.outcome ? 'over' : sideToMove}`} aria-hidden="true" />
-        {result ? 'Game over' : `${sideName(sideToMove)} to move`}
+        {turn}
+        {thinking && (
+          <span className="thinking" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        )}
       </p>
-      {result && (
+      {opponent.kind === 'computer' && (
+        <p className="matchup">
+          You play {sideName(opponent.human)} against the computer: <strong>{LEVEL_TEXT[opponent.level].name}</strong>
+        </p>
+      )}
+      {game.outcome && (
         <div className="banner banner--result">
-          <strong>{result.title}</strong>
-          <span>{result.detail}</span>
+          <strong>{outcomeTitle(game.outcome, opponent)}</strong>
+          <span>{outcomeDetail(game.outcome, opponent)}</span>
+        </div>
+      )}
+      {notice && (
+        <div className="banner">
+          <span>{notice}</span>
         </div>
       )}
       {status && (

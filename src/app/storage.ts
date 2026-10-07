@@ -1,7 +1,9 @@
 import { exportGame, importGame, type GameRecord } from '../engine/index.ts'
+import { FRIEND, isOpponent, type Opponent } from './opponent.ts'
 
 const GAME_KEY = 'mean-chess:game:v1'
 const PREFERENCES_KEY = 'mean-chess:preferences:v1'
+const OPPONENT_KEY = 'mean-chess:opponent:v1'
 
 export interface Preferences {
   readonly flipped: boolean
@@ -49,5 +51,23 @@ export function savePreferences(preferences: Preferences): void {
     window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences))
   } catch {
     // Ignore: preferences are optional.
+  }
+}
+
+/** Who the saved game is against, so a reload resumes a game against the computer. */
+export function loadOpponent(): Opponent {
+  try {
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(OPPONENT_KEY) ?? 'null')
+    return isOpponent(parsed) ? parsed : FRIEND
+  } catch {
+    return FRIEND
+  }
+}
+
+export function saveOpponent(opponent: Opponent): void {
+  try {
+    window.localStorage.setItem(OPPONENT_KEY, JSON.stringify(opponent))
+  } catch {
+    // Ignore: the next visit simply starts a game between friends.
   }
 }

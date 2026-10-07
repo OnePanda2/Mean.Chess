@@ -3,9 +3,11 @@ import {
   analyze,
   currentPosition,
   exportGame,
+  legalMoves,
   newGame,
   parseMeanFen,
   toMeanFen,
+  toUci,
   type Explanation,
   type GameRecord,
   type Outcome,
@@ -18,17 +20,30 @@ import { Modal } from '../components/Modal.tsx'
 import { PromotionDialog } from '../components/PromotionDialog.tsx'
 import { RulesSummary } from '../components/RulesSummary.tsx'
 import { ScenarioLab } from '../components/ScenarioLab.tsx'
+import { NewGameDialog } from '../components/NewGameDialog.tsx'
 import { ThemeDialog } from '../components/ThemeDialog.tsx'
 import { PieceStyleContext } from '../components/pieces/pieceStyle.ts'
 import { CapturedPieces, MoveList, StatusPanel } from '../components/SidePanel.tsx'
 import { useAppearance } from './appearance.ts'
-import { createState, gameReducer, type GameState } from './gameState.ts'
+import { useComputer } from './computer.ts'
+import { canUndo, computerToMove, createState, gameReducer, type GameState } from './gameState.ts'
+import { computerColor, type Opponent } from './opponent.ts'
 import { findScenario, type Scenario } from './scenarios.ts'
-import { loadPreferences, loadSavedGame, saveGameLocally, savePreferences } from './storage.ts'
-import { outcomeMessage, sideName } from './text.ts'
+import {
+  loadOpponent,
+  loadPreferences,
+  loadSavedGame,
+  saveGameLocally,
+  saveOpponent,
+  savePreferences,
+} from './storage.ts'
+import { outcomeDetail, outcomeTitle, sideName } from './text.ts'
 import { themeById } from './themes.ts'
 
 type Dialog = 'none' | 'scenarios' | 'rules' | 'theme' | 'new-game' | 'resign' | 'draw'
+
+/** What "Play the computer" suggests the first time. */
+const DEFAULT_COMPUTER: Opponent = { kind: 'computer', level: 'mean', human: 'white' }
 
 interface HoverHint {
   readonly selected: Square | null
@@ -54,7 +69,7 @@ function initialState(): GameState {
     const parsed = parseMeanFen(scenario.fen)
     if (parsed.ok) return createState(newGame(parsed.position), { ...preferences, scenario })
   }
-  return createState(loadSavedGame() ?? newGame(), preferences)
+  return createState(loadSavedGame() ?? newGame(), { ...preferences, opponent: loadOpponent() })
 }
 
 export function PlayApp() {
@@ -65,14 +80,21 @@ export function PlayApp() {
   const [hover, setHover] = useState<HoverHint | null>(null)
   // The result dialog is derived: it shows for an ending until the player dismisses that ending.
   const [dismissedOutcome, setDismissedOutcome] = useState<Outcome | null>(null)
+  // What the New game dialog preselects: the current opponent, or the computer from the hero.
+  const [newGameChoice, setNewGameChoice] = useState<Opponent>(state.opponent)
   const playArea = useRef<HTMLElement>(null)
+  const computer = useComputer()
 
-  const { game } = state
+  const { game, opponent } = state
   const position = currentPosition(game)
   const analysis = useMemo(() => analyze(position), [position])
   const lastMove = game.moves.at(-1) ?? null
   const over = game.outcome !== null
+  const thinking = computerToMove(state)
+  const level = opponent.kind === 'computer' ? opponent.level : null
   const hint = hover?.selected === state.selected && hover.ply === game.moves.length ? hover.explanation : null
+  const notice =
+    !over && state.drawDeclinedAt === game.moves.length ? 'The computer declines your draw offer.' : null
 
   useEffect(() => {
     saveGameLocally(game)
@@ -80,6 +102,46 @@ export function PlayApp() {
   useEffect(() => {
     savePreferences({ flipped: state.flipped })
   }, [state.flipped])
+  useEffect(() => {
+    saveOpponent(opponent)
+  }, [opponent])
+
+  // The computer's turn: ask it for a move (in a Web Worker) and play it, unless the game moved on.
+  useEffect(() => {
+    if (!thinking || level === null) return
+    let active = true
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const ply = game.moves.length
+    const started = performance.now()
+    const deliver = (uci: string): void => {
+      const wait = Math.max(0, computer.minimumThinkingTime - (performance.now() - started))
+      timer = setTimeout(() => {
+        if (active) dispatch({ type: 'computer-move', uci, ply })
+      }, wait)
+    }
+    computer
+      .move({
+        start: toMeanFen(game.start),
+        moves: game.moves.map(toUci),
+        level,
+        seed: Math.floor(Math.random() * 2 ** 31),
+      })
+      .then((reply) => {
+        if (active) deliver(reply.move)
+      })
+      .catch((error: unknown) => {
+        if (!active) return
+        // Never leave the player waiting forever: play any legal move, and say why in the console.
+        console.error('The computer could not choose a move.', error)
+        const fallback = legalMoves(currentPosition(game))[0]
+        if (fallback) deliver(toUci(fallback))
+      })
+    return () => {
+      active = false
+      if (timer !== undefined) clearTimeout(timer)
+      computer.cancel()
+    }
+  }, [thinking, level, game, computer])
   useEffect(() => {
     // A deep link is consumed once; a reload then resumes the game being played.
     if (new URLSearchParams(window.location.search).has('scenario')) {
@@ -103,10 +165,46 @@ export function PlayApp() {
     showBoard()
   }
 
+  function start(next: Opponent): void {
+    dispatch({ type: 'start', opponent: next })
+    setDialog('none')
+    setHover(null)
+    showBoard()
+  }
+
+  function openNewGame(choice: Opponent): void {
+    setNewGameChoice(choice)
+    setDialog('new-game')
+  }
+
+  /** Against the computer a draw is offered and may be declined; between friends it is agreed. */
+  function drawGame(): void {
+    setDialog('none')
+    const color = computerColor(opponent)
+    if (color === null) {
+      dispatch({ type: 'agree-draw' })
+      return
+    }
+    const ply = game.moves.length
+    computer
+      .acceptsDraw({ start: toMeanFen(game.start), moves: game.moves.map(toUci) }, color)
+      .then((accept) => {
+        dispatch({ type: 'draw-answer', accept, ply })
+      })
+      .catch(() => {
+        dispatch({ type: 'draw-answer', accept: false, ply })
+      })
+  }
+
   const showResult = game.outcome !== null && game.outcome !== dismissedOutcome && dialog === 'none'
+  const lastNotation = state.notation.at(-1) ?? ''
   const announcement = game.outcome
-    ? `${outcomeMessage(game.outcome).title}.`
-    : `${lastMove ? `${state.notation.at(-1) ?? ''}. ` : ''}${sideName(position.sideToMove)} to move.`
+    ? `${outcomeTitle(game.outcome, opponent)}.`
+    : opponent.kind === 'friend'
+      ? `${lastMove ? `${lastNotation}. ` : ''}${sideName(position.sideToMove)} to move.`
+      : thinking
+        ? `${lastMove ? `${lastNotation}. ` : ''}The computer is thinking.`
+        : `${lastMove ? `The computer played ${lastNotation}. ` : ''}Your move.`
 
   return (
     <PieceStyleContext value={themeById(appearance.theme).pieceStyle}>
@@ -123,6 +221,13 @@ export function PlayApp() {
           <div className="hero__actions">
             <button type="button" className="button button--primary" onClick={showBoard}>
               Play Mean Chess
+            </button>
+            <button
+              type="button"
+              className="button"
+              onClick={() => openNewGame(opponent.kind === 'computer' ? opponent : DEFAULT_COMPUTER)}
+            >
+              Play the computer
             </button>
             <a className="button" href="/rules/">
               How it works
@@ -145,7 +250,7 @@ export function PlayApp() {
               selected={state.selected}
               lastMove={lastMove}
               flipped={state.flipped}
-              interactive={!over}
+              interactive={!over && !thinking}
               transition={state.transition}
               animate={appearance.animations}
               onSquare={(square) => {
@@ -164,22 +269,23 @@ export function PlayApp() {
           </div>
 
           <aside className="play__panel" aria-label="Game panel">
-            <StatusPanel game={game} analysis={analysis} sideToMove={position.sideToMove} hint={hint} />
+            <StatusPanel
+              game={game}
+              analysis={analysis}
+              sideToMove={position.sideToMove}
+              hint={hint}
+              opponent={opponent}
+              thinking={thinking}
+              notice={notice}
+            />
             <div className="card controls" role="group" aria-label="Game controls">
-              <button
-                type="button"
-                className="button"
-                onClick={() => {
-                  if (game.moves.length > 0 && !over) setDialog('new-game')
-                  else load(newGame(), null)
-                }}
-              >
+              <button type="button" className="button" onClick={() => openNewGame(opponent)}>
                 New game
               </button>
               <button
                 type="button"
                 className="button"
-                disabled={game.moves.length === 0 && !over}
+                disabled={!canUndo(state)}
                 onClick={() => {
                   dispatch({ type: 'undo' })
                 }}
@@ -189,7 +295,7 @@ export function PlayApp() {
               <button type="button" className="button" onClick={() => dispatch({ type: 'flip' })}>
                 Flip board
               </button>
-              <button type="button" className="button" disabled={over} onClick={() => setDialog('draw')}>
+              <button type="button" className="button" disabled={over || thinking} onClick={() => setDialog('draw')}>
                 Draw
               </button>
               <button type="button" className="button" disabled={over} onClick={() => setDialog('resign')}>
@@ -261,18 +367,21 @@ export function PlayApp() {
         <ThemeDialog appearance={appearance} onChange={setAppearance} onClose={() => setDialog('none')} />
       )}
       {dialog === 'new-game' && (
-        <Confirm
-          title="Start a new game?"
-          text="The current game will be replaced."
-          confirm="New game"
-          onConfirm={() => load(newGame(), null)}
-          onCancel={() => setDialog('none')}
+        <NewGameDialog
+          initial={newGameChoice}
+          replacing={game.moves.length > 0 && !over}
+          onStart={start}
+          onClose={() => setDialog('none')}
         />
       )}
       {dialog === 'resign' && (
         <Confirm
-          title={`Resign as ${sideName(position.sideToMove)}?`}
-          text={`${sideName(position.sideToMove === 'white' ? 'black' : 'white')} will be declared the winner. Undo can take it back.`}
+          title={opponent.kind === 'computer' ? 'Resign this game?' : `Resign as ${sideName(position.sideToMove)}?`}
+          text={`${
+            opponent.kind === 'computer'
+              ? 'The computer'
+              : sideName(position.sideToMove === 'white' ? 'black' : 'white')
+          } will be declared the winner. Undo can take it back.`}
           confirm="Resign"
           onConfirm={() => {
             dispatch({ type: 'resign' })
@@ -283,22 +392,23 @@ export function PlayApp() {
       )}
       {dialog === 'draw' && (
         <Confirm
-          title="Agree to a draw?"
-          text="Both players agree to end the game as a draw. Undo can take it back."
-          confirm="Agree to a draw"
-          onConfirm={() => {
-            dispatch({ type: 'agree-draw' })
-            setDialog('none')
-          }}
+          title={opponent.kind === 'computer' ? 'Offer a draw?' : 'Agree to a draw?'}
+          text={
+            opponent.kind === 'computer'
+              ? 'The computer accepts only when it thinks it is losing.'
+              : 'Both players agree to end the game as a draw. Undo can take it back.'
+          }
+          confirm={opponent.kind === 'computer' ? 'Offer a draw' : 'Agree to a draw'}
+          onConfirm={drawGame}
           onCancel={() => setDialog('none')}
         />
       )}
       {showResult && (
-        <Modal title={outcomeMessage(game.outcome).title} onClose={() => setDismissedOutcome(game.outcome)}>
-          <p>{outcomeMessage(game.outcome).detail}</p>
+        <Modal title={outcomeTitle(game.outcome, opponent)} onClose={() => setDismissedOutcome(game.outcome)}>
+          <p>{outcomeDetail(game.outcome, opponent)}</p>
           <div className="row">
-            <button type="button" className="button button--primary" onClick={() => load(newGame(), null)}>
-              New game
+            <button type="button" className="button button--primary" onClick={() => start(opponent)}>
+              Play again
             </button>
             <button
               type="button"
