@@ -78,8 +78,8 @@ export function PlayApp() {
     saveGameLocally(game)
   }, [game])
   useEffect(() => {
-    savePreferences({ flipped: state.flipped, showKillZones: state.showKillZones })
-  }, [state.flipped, state.showKillZones])
+    savePreferences({ flipped: state.flipped })
+  }, [state.flipped])
   useEffect(() => {
     // A deep link is consumed once; a reload then resumes the game being played.
     if (new URLSearchParams(window.location.search).has('scenario')) {
@@ -145,7 +145,6 @@ export function PlayApp() {
               selected={state.selected}
               lastMove={lastMove}
               flipped={state.flipped}
-              showKillZones={state.showKillZones}
               interactive={!over}
               transition={state.transition}
               animate={appearance.animations}
@@ -189,14 +188,6 @@ export function PlayApp() {
               </button>
               <button type="button" className="button" onClick={() => dispatch({ type: 'flip' })}>
                 Flip board
-              </button>
-              <button
-                type="button"
-                className="button"
-                aria-pressed={state.showKillZones}
-                onClick={() => dispatch({ type: 'toggle-kill-zones' })}
-              >
-                Kill zones
               </button>
               <button type="button" className="button" disabled={over} onClick={() => setDialog('draw')}>
                 Draw

@@ -88,8 +88,8 @@ export function RulesApp() {
             is the enemy’s turn and their king can capture yours, they win.
           </p>
           <p>
-            A move after which the opponent has a Royal Capture or Royal Slaughter is called <em>suicidal</em>. The board
-            marks suicidal moves with a warning.
+            A move after which the opponent has a Royal Capture or Royal Slaughter is called <em>suicidal</em>. During a
+            game the board never warns you: spotting the Kill Zone, yours and your opponent’s, is part of the game.
           </p>
         </RuleSection>
 

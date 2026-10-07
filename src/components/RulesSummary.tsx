@@ -15,7 +15,7 @@ export function RulesSummary({ onClose }: { readonly onClose: () => void }) {
         <dt>Royal Kill Zone</dt>
         <dd>
           Standing two squares from the enemy king is legal, not check. But if the enemy king can capture yours on its
-          turn, it will. Moves that allow this are marked with a warning.
+          turn, it will. The board won’t warn you: watch for it yourself.
         </dd>
         <dt>Royal Slaughter</dt>
         <dd>

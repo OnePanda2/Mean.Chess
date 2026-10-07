@@ -5,10 +5,9 @@ const PREFERENCES_KEY = 'mean-chess:preferences:v1'
 
 export interface Preferences {
   readonly flipped: boolean
-  readonly showKillZones: boolean
 }
 
-const DEFAULT_PREFERENCES: Preferences = { flipped: false, showKillZones: false }
+const DEFAULT_PREFERENCES: Preferences = { flipped: false }
 
 /**
  * Browser storage is a convenience only: it can be missing or throw (private windows, blocked
@@ -37,11 +36,9 @@ export function loadPreferences(): Preferences {
   try {
     const parsed: unknown = JSON.parse(window.localStorage.getItem(PREFERENCES_KEY) ?? '{}')
     if (typeof parsed !== 'object' || parsed === null) return DEFAULT_PREFERENCES
+    // Older saves may also hold `showKillZones` (the overlay was removed, D-39); it is ignored.
     const record = parsed as Record<string, unknown>
-    return {
-      flipped: record.flipped === true,
-      showKillZones: record.showKillZones === true,
-    }
+    return { flipped: record.flipped === true }
   } catch {
     return DEFAULT_PREFERENCES
   }

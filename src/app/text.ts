@@ -39,13 +39,16 @@ export function outcomeMessage(outcome: Outcome): Message {
   }
 }
 
-export type StatusTone = 'win' | 'danger' | 'sacrifice' | 'check'
+export type StatusTone = 'win' | 'sacrifice' | 'check'
 
 export interface Status extends Message {
   readonly tone: StatusTone
 }
 
-/** The most important thing about the position for the player to move, if anything. */
+/**
+ * The most important thing about the position for the player to move, if anything. It never warns
+ * about the Royal Kill Zone, before or after a move (DECISIONS.md D-39).
+ */
 export function statusOf(analysis: PositionAnalysis): Status | null {
   if (analysis.royal) {
     return {
@@ -61,17 +64,7 @@ export function statusOf(analysis: PositionAnalysis): Status | null {
       detail:
         analysis.ordinary.length === 0
           ? 'Under normal chess rules this is checkmate. Your king may sacrifice a highlighted piece to escape.'
-          : 'Every normal move would let the enemy king capture yours. Your king may sacrifice a highlighted piece instead.',
-    }
-  }
-  if (analysis.doomed) {
-    return { tone: 'danger', title: 'Doomed', detail: 'Every move lets the enemy king capture yours.' }
-  }
-  if (analysis.threat) {
-    return {
-      tone: 'danger',
-      title: 'Royal Kill Zone',
-      detail: 'The enemy king can capture yours on its next move.',
+          : 'Your king may sacrifice a highlighted piece to escape.',
     }
   }
   if (analysis.inCheck) return { tone: 'check', title: 'Check', detail: 'Your king is attacked.' }

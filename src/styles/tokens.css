@@ -6,7 +6,7 @@
 @import '@fontsource/fredoka/latin-600.css';
 
 /* The Mean theme: the default, and the base every other theme overrides (styles/themes.css).
-   Two accents, one meaning each: --royal = royal moves, check, danger; --gold = sacrifice, focus,
+   Two accents, one meaning each: --royal = royal moves and check; --gold = sacrifice, focus,
    highlights. Themes change the values, never the meanings. */
 :root,
 [data-theme='mean'] {

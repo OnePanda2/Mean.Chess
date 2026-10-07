@@ -218,22 +218,6 @@
   }
 }
 
-/* Danger: walking into the Royal Kill Zone. Stacks on top of any other hint. */
-.hint--danger {
-  top: 3%;
-  right: 3%;
-  width: 30%;
-  height: 30%;
-  color: var(--royal);
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.75));
-}
-
-.hint--danger svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 /* A desperate king's eligible sacrifices, before the king is selected. */
 .hint--eligible {
   inset: 6%;
@@ -250,20 +234,6 @@
       0 0 0 3px var(--gold),
       0 0 4px 0 color-mix(in srgb, var(--gold) 40%, transparent);
   }
-}
-
-/* The side to move's king stands in the enemy's Royal Kill Zone. */
-.hint--threat {
-  inset: 2%;
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--royal);
-  background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--royal) 35%, transparent) 0 4px, transparent 4px 9px);
-}
-
-/* Optional overlay: squares the enemy king can strike. */
-.hint--zone {
-  inset: 0;
-  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--royal) 30%, transparent) 0 5px, transparent 5px 11px);
 }
 
 /* Static diagram boards */

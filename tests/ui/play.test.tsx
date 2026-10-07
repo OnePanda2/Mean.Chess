@@ -61,7 +61,11 @@ describe('the play page', () => {
     render(<PlayApp />)
     expect(window.location.search).toBe('') // the deep link is consumed
     await user.click(square('e4'))
-    expect(square('f3').getAttribute('aria-label')).toContain('walks into the Royal Kill Zone')
+    // The step into the Kill Zone looks like any other move (D-39).
+    expect(square('f3').getAttribute('aria-label')).toBe('f3, empty, move here')
+    expect(document.querySelectorAll('.board__hints .hint').length).toBe(
+      document.querySelectorAll('.board__hints .hint--dot').length,
+    )
     await user.click(square('f3'))
     expect(status().getByText('Royal Capture available')).toBeTruthy()
     await user.click(square('h1'))
@@ -70,6 +74,22 @@ describe('the play page', () => {
     const dialog = screen.getByRole('dialog', { name: 'White wins' })
     expect(within(dialog).getByText(/Royal Capture/)).toBeTruthy()
     expect(moveList().getByText('K×K')).toBeTruthy()
+  })
+
+  it('never reveals the Kill Zone: no threat alert, no "Doomed", no overlay button (D-39)', () => {
+    // White's king threatens a Royal Slaughter through its e2 pawn, with Black to move.
+    resumeFrom('8/8/8/8/8/4k3/4P3/4K3 b - - 0 1')
+    const { container, unmount } = render(<PlayApp />)
+    expect(status().queryByText(/Kill Zone/)).toBeNull()
+    expect(square('e3').getAttribute('aria-label')).toBe('e3, black king')
+    expect(container.querySelectorAll('.board__hints .hint')).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: 'Kill zones' })).toBeNull()
+    unmount()
+    // In check with nothing to eat, and the only escape (h2) walks into the Kill Zone.
+    resumeFrom('6r1/8/8/8/4bk2/8/8/7K w - - 0 1')
+    render(<PlayApp />)
+    expect(status().queryByText('Doomed')).toBeNull()
+    expect(status().getByText('Check')).toBeTruthy()
   })
 
   it('offers Royal Cannibalism out of a back-rank mate and records it', async () => {

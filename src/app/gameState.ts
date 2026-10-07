@@ -43,7 +43,6 @@ export interface GameState {
   readonly selected: Square | null
   readonly promotion: PendingPromotion | null
   readonly flipped: boolean
-  readonly showKillZones: boolean
   /** The Scenario Lab position being played, if any. */
   readonly scenario: Scenario | null
   readonly transition: Transition
@@ -60,7 +59,6 @@ export type GameAction =
   | { readonly type: 'resign' }
   | { readonly type: 'agree-draw' }
   | { readonly type: 'flip' }
-  | { readonly type: 'toggle-kill-zones' }
 
 export function notationFor(game: GameRecord): string[] {
   return game.moves.map((move, index) => toMcn(game.positions[index] ?? game.start, move))
@@ -73,7 +71,6 @@ export function createState(game: GameRecord, options: Partial<GameState> = {}):
     selected: null,
     promotion: null,
     flipped: false,
-    showKillZones: false,
     scenario: null,
     transition: { id: 0, kind: 'reset', from: null, move: null },
     ...options,
@@ -167,7 +164,5 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, game: agreeDraw(state.game), selected: null }
     case 'flip':
       return { ...state, flipped: !state.flipped }
-    case 'toggle-kill-zones':
-      return { ...state, showKillZones: !state.showKillZones }
   }
 }

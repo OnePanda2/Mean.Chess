@@ -16,7 +16,8 @@ Everything in standard chess applies, plus:
   in a straight line (rank, file or diagonal) when the square between is empty. That wins at once,
   even while in check.
 - **Royal Kill Zone.** Standing two squares from the enemy king is legal and isn't check, but if the
-  enemy king can capture yours on its turn, it will. The board warns you before you step in.
+  enemy king can capture yours on its turn, it will. The board won't warn you: spotting it is part of
+  the game.
 - **Royal Slaughter.** If one of your own *eligible* pieces stands between the kings, your king eats
   it and captures the enemy king in one move.
 - **Sacrifice tiers.** Pawns, then knights and bishops, then rooks, then promoted queens. Only your
@@ -31,8 +32,8 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
 ## Features
 
 - A rules engine that is complete and heavily tested (see *Testing* below).
-- Move hints with four levels of emphasis: normal moves, Kill Zone danger, sacrifices and winning
-  captures. Every special move is explained.
+- Move hints for normal moves, captures, sacrifices and winning royal captures, with every special
+  move explained. Deliberately, nothing reveals the Kill Zone.
 - Scenario Lab: curated positions for every rule, plus importing and sharing positions (MeanFEN) and
   whole games.
 - Original piece artwork in four themes: **Mean**, **Sugar** (pink), **Arcade** (8-bit, pixel

@@ -37,17 +37,15 @@ describe('move explanations', () => {
     })
   })
 
-  it('explains Royal Cannibalism when every normal move is suicidal (C9)', () => {
+  it('explains Royal Cannibalism when every normal move is suicidal, without saying so (C9, D-39)', () => {
     expect(explanation('8/8/8/8/5k2/8/6P1/r6K w - - 0 1', 'h1g2')?.detail).toBe(
-      'Every normal move would let the enemy king capture yours. Your king may sacrifice this pawn to escape.',
+      'Your king is desperate, so it may sacrifice this pawn to escape.',
     )
   })
 
-  it('warns about a suicidal move and stays quiet about a safe one', () => {
-    expect(explanation('8/8/8/8/4k3/8/8/7K b - - 0 1', 'e4f3')).toEqual({
-      title: 'Royal Kill Zone',
-      detail: 'After this move the enemy king can capture yours.',
-    })
+  it('never reveals the Kill Zone: a suicidal step reads like any other move (D-39)', () => {
+    expect(legal(position('8/8/8/8/4k3/8/8/7K b - - 0 1'), 'e4f3').suicidal).toBe(true)
+    expect(explanation('8/8/8/8/4k3/8/8/7K b - - 0 1', 'e4f3')).toBeNull()
     expect(explanation('8/8/8/8/4k3/8/8/7K b - - 0 1', 'e4d5')).toBeNull()
   })
 })

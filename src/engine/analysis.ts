@@ -46,7 +46,10 @@ export function pieceName(piece: Piece | null | undefined): string {
   return piece.type
 }
 
-/** Why this move is special, or null for an ordinary safe move. */
+/**
+ * Why this move is special, or null for an ordinary move. It never says whether a move walks into
+ * the Royal Kill Zone: spotting that is part of the game (DECISIONS.md D-39).
+ */
 export function explainMove(analysis: PositionAnalysis, move: Move): Explanation | null {
   switch (move.kind) {
     case 'royal-capture':
@@ -60,20 +63,17 @@ export function explainMove(analysis: PositionAnalysis, move: Move): Explanation
         detail: `Your ${pieceName(move.sacrificed)} stands between the kings and is your eligible sacrifice. Your king eats it and captures the opposing king. This wins the game.`,
       }
     case 'self-capture': {
-      const why =
-        analysis.ordinary.length === 0
-          ? 'Under normal chess rules this is checkmate.'
-          : 'Every normal move would let the enemy king capture yours.'
-      const warning = move.suicidal ? ' Careful: the enemy king could then capture yours.' : ''
+      const name = pieceName(move.sacrificed)
       return {
         title: 'Royal Cannibalism',
-        detail: `${why} Your king may sacrifice this ${pieceName(move.sacrificed)} to escape.${warning}`,
+        detail:
+          analysis.ordinary.length === 0
+            ? `Under normal chess rules this is checkmate. Your king may sacrifice this ${name} to escape.`
+            : `Your king is desperate, so it may sacrifice this ${name} to escape.`,
       }
     }
     default:
-      return move.suicidal
-        ? { title: 'Royal Kill Zone', detail: 'After this move the enemy king can capture yours.' }
-        : null
+      return null
   }
 }
 

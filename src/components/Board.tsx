@@ -3,10 +3,8 @@ import {
   explainMove,
   fileOf,
   findKing,
-  opposite,
   pieceName,
   rankOf,
-  royalReach,
   squareAt,
   squareName,
   type Explanation,
@@ -17,30 +15,31 @@ import {
   type Square,
 } from '../engine/index.ts'
 import type { Transition } from '../app/gameState.ts'
-import { CrownIcon, SacrificeIcon, WarningIcon } from './Icons.tsx'
+import { CrownIcon, SacrificeIcon } from './Icons.tsx'
 import { PieceImage } from './PieceImage.tsx'
 
-/** The four levels of emphasis (docs/BLUEPRINT.md §5.3): plus a danger flag that can stack on any. */
+/**
+ * How a legal target is marked. Nothing marks a move that walks into the Royal Kill Zone: spotting
+ * it is part of the game (docs/DECISIONS.md D-39).
+ */
 type HintBase = 'move' | 'capture' | 'sacrifice' | 'win'
 
 interface Hint {
   readonly base: HintBase
-  readonly danger: boolean
   readonly label: string
   readonly explanation: Explanation | null
 }
 
 function hintFor(move: Move, analysis: PositionAnalysis): Hint {
   const explanation = explainMove(analysis, move)
-  const danger = move.suicidal === true
-  if (move.kind === 'royal-capture') return { base: 'win', danger, label: 'Royal Capture, wins the game', explanation }
-  if (move.kind === 'royal-slaughter') return { base: 'win', danger, label: 'Royal Slaughter, wins the game', explanation }
+  if (move.kind === 'royal-capture') return { base: 'win', label: 'Royal Capture, wins the game', explanation }
+  if (move.kind === 'royal-slaughter') return { base: 'win', label: 'Royal Slaughter, wins the game', explanation }
   if (move.kind === 'self-capture') {
-    return { base: 'sacrifice', danger, label: `sacrifice your ${pieceName(move.sacrificed)} (Royal Cannibalism)`, explanation }
+    return { base: 'sacrifice', label: `sacrifice your ${pieceName(move.sacrificed)} (Royal Cannibalism)`, explanation }
   }
   return move.captured
-    ? { base: 'capture', danger, label: 'capture', explanation }
-    : { base: 'move', danger, label: 'move here', explanation }
+    ? { base: 'capture', label: 'capture', explanation }
+    : { base: 'move', label: 'move here', explanation }
 }
 
 /** Visual position of a square: column and row from the top-left, given the orientation. */
@@ -91,7 +90,6 @@ export interface BoardProps {
   readonly selected: Square | null
   readonly lastMove: Move | null
   readonly flipped: boolean
-  readonly showKillZones: boolean
   readonly interactive: boolean
   /** The latest change, for animation (gameState.ts). */
   readonly transition: Transition
@@ -110,7 +108,6 @@ export function Board({
   selected,
   lastMove,
   flipped,
-  showKillZones,
   interactive,
   transition,
   animate,
@@ -128,15 +125,8 @@ export function Board({
       if (move.from === selected && !targets.has(move.to)) targets.set(move.to, hintFor(move, analysis))
     }
   }
-  const ownKing = findKing(board, sideToMove)
-  const checkSquare = analysis.inCheck ? ownKing : null
-  const threatSquare = analysis.threat && !analysis.royal ? ownKing : null
+  const checkSquare = analysis.inCheck ? findKing(board, sideToMove) : null
   const eligible = new Set(selected === null ? analysis.cannibalism.map((move) => move.to) : [])
-  const killZone = new Set(
-    showKillZones
-      ? royalReach(board, opposite(sideToMove)).filter((sq) => !board[sq] || sq === ownKing)
-      : [],
-  )
   const pieces: { piece: Piece; sq: Square }[] = []
   board.forEach((piece, sq) => {
     if (piece) pieces.push({ piece, sq })
@@ -191,9 +181,7 @@ export function Board({
             piece ? `${piece.color} ${pieceName(piece)}` : 'empty',
             selected === sq ? 'selected' : '',
             checkSquare === sq ? 'in check' : '',
-            threatSquare === sq ? 'in the Royal Kill Zone' : '',
             hint ? hint.label : '',
-            hint?.danger ? 'walks into the Royal Kill Zone' : '',
             eligible.has(sq) ? 'can be sacrificed' : '',
           ]
           return (
@@ -257,8 +245,6 @@ export function Board({
           const hint = targets.get(sq)
           return (
             <div key={sq} className="hint-cell">
-              {killZone.has(sq) && <span className="hint hint--zone" />}
-              {threatSquare === sq && <span className="hint hint--threat" />}
               {eligible.has(sq) && <span className="hint hint--eligible" />}
               {hint?.base === 'move' && <span className="hint hint--dot" />}
               {hint?.base === 'capture' && <span className="hint hint--ring" />}
@@ -271,11 +257,6 @@ export function Board({
                 <span className="hint hint--win">
                   <CrownIcon />
                   <span className="hint__label">Win</span>
-                </span>
-              )}
-              {hint?.danger && (
-                <span className="hint hint--danger">
-                  <WarningIcon />
                 </span>
               )}
             </div>

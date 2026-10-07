@@ -269,11 +269,6 @@
   border-left-color: var(--royal);
 }
 
-.banner--danger {
-  border-left-color: var(--royal);
-  background: var(--royal-soft);
-}
-
 .banner--sacrifice,
 .banner--result {
   border-left-color: var(--gold);
@@ -297,22 +292,25 @@
   font-weight: 600;
 }
 
-/* Controls */
+/* Controls: four to a row (two on phones). A short last row stretches to fill it, whatever the
+   number of buttons. The basis leaves 8px of slack so rounding never wraps a full row early. */
 .controls {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 12px;
 }
 
 .controls .button {
+  flex: 1 1 calc(25% - 8px);
+  min-width: 0;
   padding: 8px 6px;
   font-size: 0.82rem;
 }
 
 @media (max-width: 420px) {
-  .controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .controls .button {
+    flex-basis: calc(50% - 8px);
   }
 }
 
