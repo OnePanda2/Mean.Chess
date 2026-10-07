@@ -5,8 +5,8 @@
 Mean Chess is an independent chess variant. Checkmate isn't always the end, kings hunt each other,
 and sometimes a king has to sacrifice his own pieces to survive.
 
-**Play it at https://meanchess.siddheshthapa.com.** Two players share one device; there's nothing
-to install and no account.
+**Play it at https://meanchess.siddheshthapa.com.** Play the computer at three levels, or a friend
+on the same device. There's nothing to install and no account.
 
 ## The rules in one minute
 
@@ -32,6 +32,9 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
 ## Features
 
 - A rules engine that is complete and heavily tested (see *Testing* below).
+- A computer opponent at three levels: **Nice**, **Mean** and **Ruthless**. It thinks in a Web
+  Worker, so the page never freezes, and it will take your king the moment you step into its Kill
+  Zone.
 - Move hints for normal moves, captures, sacrifices and winning royal captures, with every special
   move explained. Deliberately, nothing reveals the Kill Zone.
 - Scenario Lab: curated positions for every rule, plus importing and sharing positions (MeanFEN) and
@@ -64,19 +67,24 @@ Then open http://localhost:5173.
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build |
 | `npm run perft -- start 4` | Count move-tree leaves (engine check) |
+| `npm run selfplay -- ruthless mean 10` | Play the computer's levels against each other (tuning) |
 
 ## How it's built
 
 - **Engine:** `src/engine`, pure TypeScript with no React or DOM, deterministic, and reusable by a
-  future AI or game server. See [docs/ENGINE.md](docs/ENGINE.md).
+  future game server. See [docs/ENGINE.md](docs/ENGINE.md).
+- **Computer opponent:** `src/ai` runs an alpha-beta search on its own fast board, which tests prove
+  equal to the engine. It runs in a Web Worker. See [docs/AI.md](docs/AI.md).
 - **Interface:** React 19, Vite 8, plain CSS with theme tokens. Two real pages: `/` (play) and
   `/rules/`.
-- **Testing:** Vitest. Over 260 tests:
+- **Testing:** Vitest. Over 320 tests:
   - every rule and the original brief's acceptance scenarios;
   - published perft numbers;
   - Mean perft values predicted by an independent implementation;
   - about 20,000 positions cross-checked against chess.js;
-  - invariants over about 43,000 random Mean moves.
+  - invariants over about 43,000 random Mean moves;
+  - the computer's board checked against the engine move for move, and its play tested
+    position by position.
 - **Deployment:** GitHub Actions runs lint, type checks, tests and the build, then publishes to GitHub
   Pages. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
@@ -85,13 +93,14 @@ Then open http://localhost:5173.
 - [docs/RULES.md](docs/RULES.md): Mean Chess Rules v0.1, the canonical specification.
 - [docs/DECISIONS.md](docs/DECISIONS.md): every interpretation and trade-off.
 - [docs/ENGINE.md](docs/ENGINE.md): engine architecture, formats and testing.
-- [docs/ROADMAP.md](docs/ROADMAP.md): what comes next (AI, then online play).
+- [docs/AI.md](docs/AI.md): the computer opponent: its board, search, evaluation and levels.
+- [docs/ROADMAP.md](docs/ROADMAP.md): what comes next (online play).
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): hosting, domain and HTTPS.
 - [docs/BLUEPRINT.md](docs/BLUEPRINT.md): the pre-build plan and research.
 
 ## Known limitations
 
-- Local play only: no AI opponent and no online play yet (see the roadmap).
+- No online play yet (see the roadmap).
 - Moves are made by tapping or clicking; drag-and-drop isn't supported yet.
 - No sound.
 

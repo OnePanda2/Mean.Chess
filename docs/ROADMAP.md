@@ -1,18 +1,25 @@
 # Roadmap
 
-## v0.1 (this release)
+## v0.1 (released)
 
 Local two-player Mean Chess in the browser: the complete rules engine, an interface that explains
 every special move, Scenario Lab, original piece artwork in four themes (Mean, Sugar, Arcade,
 Picnic), move and capture animations, the rules page, and deployment to GitHub Pages.
 
-## v0.2: play against the computer
+## v0.2 (this release): play against the computer
 
-- A practice AI: alpha-beta search in a Web Worker, built on this engine (Stockfish and
-  Fairy-Stockfish cannot express Mean rules, and the latter is GPL).
-- A Mean-aware evaluation: material with the original queen worth more than a promoted one, royal
-  threats, Kill Zone control, how exposed each side's sacrifice tier is, king hunting.
-- Zobrist hashing and a transposition table.
+- A computer opponent at three levels, Nice, Mean and Ruthless (see [AI.md](AI.md)):
+  - an alpha-beta search in a Web Worker, on its own fast board, proven equal to the engine
+    (Stockfish and Fairy-Stockfish cannot express Mean rules, and the latter is GPL);
+  - Zobrist hashing and a transposition table;
+  - an evaluation that values the original queen above a promoted one and drives a beaten king into
+    the corner, where its only moves are suicidal.
+- The board no longer reveals the Royal Kill Zone during play (founder ruling, D-39).
+
+## Next
+
+- A richer Mean evaluation: Kill Zone control, how exposed each side's sacrifice tier is, king
+  hunting in the middlegame.
 - Drag-and-drop moves, sound effects, an Open Graph preview image, PGN-style export, and a guided
   tutorial built on Scenario Lab.
 

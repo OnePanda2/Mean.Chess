@@ -1,8 +1,9 @@
 # The Mean Chess engine
 
 `src/engine` is a pure, deterministic TypeScript rules engine. It has no React, DOM, randomness or
-clock (ESLint enforces this), so the same code can later run in a Web Worker for an AI or on a
-server that validates online games. Everything outside the engine imports from
+clock (ESLint enforces this), so the same code can run anywhere, including on a server that
+validates online games. The computer opponent (`src/ai`, [AI.md](AI.md)) searches on its own fast
+board, but every move it chooses is played through this engine. Everything outside the engine imports from
 `src/engine/index.ts` only.
 
 The rules it implements are in [RULES.md](RULES.md).
@@ -114,8 +115,8 @@ On the development machine, start-position perft(5) takes about 4.6 seconds.
 
 ## Extending the engine
 
-- **AI:** `legalMoves`, `applyMove` and `analyze` are all an alpha-beta search needs. Run it in a
-  Web Worker. Zobrist hashing can be added next to `positionKey` (with separate keys for original
-  and promoted queens).
+- **AI:** the computer opponent lives in `src/ai` ([AI.md](AI.md)). It reimplements these rules on
+  a faster board, and its tests prove that board equal to this engine. A rule change must be made
+  in both places, and `tests/ai/board.test.ts` will fail until the two agree.
 - **Online play:** a server can validate coordinate moves with `play()`; the engine is
   deterministic, so client and server always agree.
