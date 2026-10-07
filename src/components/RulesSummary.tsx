@@ -35,7 +35,8 @@ export function RulesSummary({ onClose }: { readonly onClose: () => void }) {
         <dt>Draws</dt>
         <dd>Stalemate, threefold repetition, the fifty-move rule or agreement. Material alone never draws.</dd>
       </dl>
-      <p>
+      <p className="row">
+        <a href="/tutorial/">Learn them on a board: the tutorial →</a>
         <a href="/rules/">Read the full rules (v0.1) →</a>
       </p>
     </Modal>

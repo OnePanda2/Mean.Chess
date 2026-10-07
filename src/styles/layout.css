@@ -33,7 +33,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 560px) {
   .topbar__brand {
     font-size: 1.1rem;
     letter-spacing: 0.1em;
@@ -46,6 +46,13 @@
 
   /* The footer links to the source too. Phones need the room for the theme button. */
   .topbar__source {
+    display: none;
+  }
+}
+
+/* Small phones: the crown alone is the home link (labelled "Mean Chess home"), so the whole menu fits. */
+@media (max-width: 440px) {
+  .topbar__name {
     display: none;
   }
 }
@@ -95,13 +102,7 @@
   margin: 4px 0;
 }
 
-/* Hero */
-.hero {
-  max-width: var(--page-width);
-  margin: 0 auto;
-  padding: 18px var(--gutter) 8px;
-}
-
+/* Page titles (welcome, tutorial and rules pages) */
 .hero__eyebrow {
   margin: 0 0 8px;
   font-size: 0.75rem;
@@ -134,47 +135,10 @@
   color: var(--text-muted);
 }
 
-.hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-/* Wide screens: the hero becomes a band so the board starts high on the page. */
+/* Wide screens: page titles stop growing. */
 @media (min-width: 1000px) {
-  .hero {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      'eyebrow tagline'
-      'title lede'
-      'title actions';
-    column-gap: 40px;
-    align-items: end;
-  }
-
-  .hero__eyebrow {
-    grid-area: eyebrow;
-  }
-
   .hero__title {
-    grid-area: title;
-    align-self: start;
     font-size: clamp(3.4rem, 6vw, 5rem);
-  }
-
-  .hero__tagline {
-    grid-area: tagline;
-    margin: 0;
-  }
-
-  .hero__lede {
-    grid-area: lede;
-    margin: 4px 0 12px;
-  }
-
-  .hero__actions {
-    grid-area: actions;
   }
 }
 
@@ -381,46 +345,11 @@
   height: 24px;
 }
 
-/* Rule cards */
-.rule-cards {
-  max-width: var(--page-width);
-  margin: 0 auto;
-  padding: 12px var(--gutter) 56px;
-}
-
 .section-title {
   margin: 0 0 16px;
   font-family: var(--font-display);
   font-weight: var(--display-weight);
   font-size: clamp(1.7rem, 4vw, 2.4rem);
-}
-
-.rule-cards__grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-}
-
-.rule-card {
-  display: grid;
-  gap: 10px;
-  align-content: start;
-}
-
-.rule-card h3 {
-  margin: 4px 0 0;
-  font-family: var(--font-display);
-  font-weight: var(--display-weight);
-  font-size: 1.5rem;
-}
-
-.rule-card p {
-  margin: 0;
-  color: var(--text-muted);
-}
-
-.rule-card .button {
-  justify-self: start;
 }
 
 /* Scenario Lab, promotion, quick rules */
@@ -543,7 +472,7 @@
   height: 18px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 560px) {
   .topbar__theme span {
     position: absolute;
     width: 1px;
@@ -752,4 +681,295 @@
     animation: none;
     opacity: 0.7;
   }
+}
+
+/* Welcome page: the front door (D-48). */
+.welcome,
+.tutorial {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 28px var(--gutter) 56px;
+}
+
+.welcome__hero {
+  display: grid;
+  gap: 28px;
+  align-items: center;
+}
+
+.welcome__art .mini-board {
+  max-width: 300px;
+  margin: 0 auto;
+  box-shadow: var(--shadow);
+}
+
+@media (min-width: 860px) {
+  .welcome__hero {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+
+@media (max-width: 859px) {
+  .welcome__art {
+    display: none;
+  }
+}
+
+.welcome__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 28px 0 20px;
+}
+
+.welcome-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 18px 20px;
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.welcome-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.welcome-card__title {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.welcome-card--large .welcome-card__title {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+}
+
+.welcome-card__subtitle {
+  font-weight: 700;
+}
+
+.welcome-card__detail {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.welcome-card__badge {
+  justify-self: start;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--bg);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.welcome__more {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-card:hover {
+    transform: none;
+  }
+}
+
+/* Tutorial page (D-48) */
+.tutorial {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.tutorial__header {
+  display: grid;
+  gap: 4px;
+}
+
+.tutorial h1:focus {
+  outline: none;
+}
+
+.tutorial__resume {
+  justify-self: start;
+}
+
+.tutorial__question .welcome__choices {
+  margin: 0;
+}
+
+.tutorial__links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tutorial__links .welcome-card {
+  height: 100%;
+}
+
+.tutorial__lessons ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.tutorial__lessons .link-button {
+  color: var(--text);
+}
+
+/* A lesson: the explanation, then the board. Side by side on wide screens. */
+.lesson {
+  display: grid;
+  grid-template-areas:
+    'text'
+    'practice'
+    'nav';
+  gap: 18px 36px;
+}
+
+@media (min-width: 1000px) {
+  .lesson {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 600px);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'text practice'
+      'nav practice';
+    align-items: start;
+  }
+}
+
+.lesson__text {
+  grid-area: text;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.lesson__text p {
+  margin: 0;
+}
+
+.lesson__count {
+  color: var(--gold);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.lesson__progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-raised);
+}
+
+.lesson__progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold);
+}
+
+.lesson__title {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  line-height: 1.05;
+}
+
+.lesson__practice {
+  grid-area: practice;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  align-content: start;
+  min-width: 0;
+}
+
+.lesson__task {
+  justify-self: stretch;
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius-small);
+  background: var(--gold-soft);
+}
+
+.lesson__feedback {
+  display: grid;
+  justify-self: stretch;
+  justify-items: start;
+  gap: 8px;
+}
+
+.lesson__feedback .banner {
+  justify-self: stretch;
+  margin: 0;
+}
+
+.lesson__diagram {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.lesson__diagram .mini-board {
+  max-width: 320px;
+}
+
+.lesson__nav {
+  grid-area: nav;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.banner--success {
+  border-left-color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.banner--failure {
+  border-left-color: var(--royal);
+  background: var(--royal-soft);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--text);
 }

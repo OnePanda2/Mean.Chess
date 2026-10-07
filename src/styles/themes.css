@@ -168,7 +168,8 @@ html[data-theme='arcade'] body::after {
 [data-theme='arcade'] .section-title,
 [data-theme='arcade'] .modal__header h2,
 [data-theme='arcade'] .rule h2,
-[data-theme='arcade'] .rule-card h3 {
+[data-theme='arcade'] .welcome-card__title,
+[data-theme='arcade'] .lesson__title {
   font-size: clamp(0.8rem, 2.2vw, 1.1rem);
   line-height: 1.6;
 }

@@ -3,7 +3,13 @@ import { CrownIcon, PaletteIcon } from './Icons.tsx'
 
 const REPOSITORY = 'https://github.com/OnePanda2/Mean.Chess'
 
-export function TopBar({ current, onTheme }: { readonly current: 'play' | 'rules'; readonly onTheme: () => void }) {
+export function TopBar({
+  current,
+  onTheme,
+}: {
+  readonly current: 'welcome' | 'play' | 'tutorial' | 'rules'
+  readonly onTheme: () => void
+}) {
   return (
     <header className="topbar">
       <a className="topbar__brand" href="/" aria-label="Mean Chess home">
@@ -15,8 +21,13 @@ export function TopBar({ current, onTheme }: { readonly current: 'play' | 'rules
       <nav aria-label="Main">
         <ul className="topbar__nav">
           <li>
-            <a href="/" aria-current={current === 'play' ? 'page' : undefined}>
+            <a href="/play/" aria-current={current === 'play' ? 'page' : undefined}>
               Play
+            </a>
+          </li>
+          <li>
+            <a href="/tutorial/" aria-current={current === 'tutorial' ? 'page' : undefined}>
+              Tutorial
             </a>
           </li>
           <li>

@@ -15,7 +15,6 @@ import {
 } from '../engine/index.ts'
 import { Board } from '../components/Board.tsx'
 import { Footer, TopBar } from '../components/Chrome.tsx'
-import { MiniBoard } from '../components/MiniBoard.tsx'
 import { Modal } from '../components/Modal.tsx'
 import { PromotionDialog } from '../components/PromotionDialog.tsx'
 import { RulesSummary } from '../components/RulesSummary.tsx'
@@ -27,7 +26,7 @@ import { CapturedPieces, MoveList, StatusPanel } from '../components/SidePanel.t
 import { useAppearance } from './appearance.ts'
 import { useComputer } from './computer.ts'
 import { canUndo, computerToMove, createState, gameReducer, type GameState } from './gameState.ts'
-import { computerColor, type Opponent } from './opponent.ts'
+import { FRIEND, computerColor, type Opponent } from './opponent.ts'
 import { findScenario, type Scenario } from './scenarios.ts'
 import {
   loadOpponent,
@@ -42,8 +41,19 @@ import { themeById } from './themes.ts'
 
 type Dialog = 'none' | 'scenarios' | 'rules' | 'theme' | 'new-game' | 'resign' | 'draw'
 
-/** What "Play the computer" suggests the first time. */
+/** What the New game dialog suggests for the computer the first time. */
 const DEFAULT_COMPUTER: Opponent = { kind: 'computer', level: 'mean', human: 'white' }
+
+/**
+ * /play/?new=computer|friend|choose (from the welcome page or the tutorial) opens the New game
+ * dialog with that choice made; anything but "friend" suggests the computer.
+ */
+function requestedChoice(current: Opponent): Opponent | null {
+  const value = new URLSearchParams(window.location.search).get('new')
+  if (value === null) return null
+  if (value === 'friend') return FRIEND
+  return current.kind === 'computer' ? current : DEFAULT_COMPUTER
+}
 
 interface HoverHint {
   readonly selected: Square | null
@@ -60,7 +70,7 @@ function prefersReducedMotion(): boolean {
   }
 }
 
-/** A deep link (/?scenario=id) wins over the saved game; otherwise resume or start fresh. */
+/** A deep link (/play/?scenario=id) wins over the saved game; otherwise resume or start fresh. */
 function initialState(): GameState {
   const preferences = loadPreferences()
   const requested = new URLSearchParams(window.location.search).get('scenario')
@@ -75,13 +85,14 @@ function initialState(): GameState {
 export function PlayApp() {
   const [state, dispatch] = useReducer(gameReducer, undefined, initialState)
   const [appearance, setAppearance] = useAppearance()
-  const [dialog, setDialog] = useState<Dialog>('none')
+  const [requested] = useState(() => requestedChoice(state.opponent))
+  const [dialog, setDialog] = useState<Dialog>(requested ? 'new-game' : 'none')
   // The hovered target's explanation, tied to the selection and ply it was computed for.
   const [hover, setHover] = useState<HoverHint | null>(null)
   // The result dialog is derived: it shows for an ending until the player dismisses that ending.
   const [dismissedOutcome, setDismissedOutcome] = useState<Outcome | null>(null)
-  // What the New game dialog preselects: the current opponent, or the computer from the hero.
-  const [newGameChoice, setNewGameChoice] = useState<Opponent>(state.opponent)
+  // What the New game dialog preselects: the current opponent, or what the link asked for.
+  const [newGameChoice, setNewGameChoice] = useState<Opponent>(requested ?? state.opponent)
   const playArea = useRef<HTMLElement>(null)
   const computer = useComputer()
 
@@ -144,7 +155,8 @@ export function PlayApp() {
   }, [thinking, level, game, computer])
   useEffect(() => {
     // A deep link is consumed once; a reload then resumes the game being played.
-    if (new URLSearchParams(window.location.search).has('scenario')) {
+    const params = new URLSearchParams(window.location.search)
+    if (params.has('scenario') || params.has('new')) {
       window.history.replaceState(null, '', window.location.pathname)
     }
   }, [])
@@ -210,31 +222,7 @@ export function PlayApp() {
     <PieceStyleContext value={themeById(appearance.theme).pieceStyle}>
       <TopBar current="play" onTheme={() => setDialog('theme')} />
       <main id="main">
-        <section className="hero">
-          <p className="hero__eyebrow">A chess variant</p>
-          <h1 className="hero__title">Mean Chess</h1>
-          <p className="hero__tagline">Chess, but your king is allowed to eat his own army.</p>
-          <p className="hero__lede">
-            A chess variant where checkmate isn’t always the end, kings can hunt each other, and sometimes the king has
-            to sacrifice his own pieces to survive.
-          </p>
-          <div className="hero__actions">
-            <button type="button" className="button button--primary" onClick={showBoard}>
-              Play Mean Chess
-            </button>
-            <button
-              type="button"
-              className="button"
-              onClick={() => openNewGame(opponent.kind === 'computer' ? opponent : DEFAULT_COMPUTER)}
-            >
-              Play the computer
-            </button>
-            <a className="button" href="/rules/">
-              How it works
-            </a>
-          </div>
-        </section>
-
+        <h1 className="sr-only">Play Mean Chess</h1>
         <section className="play" aria-label="Game" ref={playArea}>
           <div className="play__board">
             {state.scenario && (
@@ -311,38 +299,6 @@ export function PlayApp() {
             <MoveList game={game} notation={state.notation} />
             <CapturedPieces game={game} />
           </aside>
-        </section>
-
-        <section className="rule-cards" aria-labelledby="rule-cards-title">
-          <h2 id="rule-cards-title" className="section-title">
-            Three rules that change everything
-          </h2>
-          <div className="rule-cards__grid">
-            <RuleCard
-              title="Royal Capture"
-              text="Only a king can capture a king, from exactly two squares away in a straight line. It ends the game on the spot."
-              fen="8/8/8/8/8/5k2/8/7K w - - 0 1"
-              marks={{ f3: 'win' }}
-              label="White king on h1 can capture the black king on f3."
-              onTry={() => load(scenarioGame('royal-capture'), findScenario('royal-capture') ?? null)}
-            />
-            <RuleCard
-              title="Royal Slaughter"
-              text="If your own eligible piece stands between the kings, your king eats it and takes the enemy king in one move."
-              fen="8/8/8/8/8/4k3/4P3/4K3 w - - 0 1"
-              marks={{ e2: 'sacrifice', e3: 'win' }}
-              label="White king on e1 eats its pawn on e2 and captures the black king on e3."
-              onTry={() => load(scenarioGame('slaughter-pawn'), findScenario('slaughter-pawn') ?? null)}
-            />
-            <RuleCard
-              title="Royal Cannibalism"
-              text="Checkmated? Not yet. A desperate king may eat an adjacent piece of its lowest remaining tier to escape."
-              fen="k7/8/8/8/8/8/5PPP/4r1K1 w - - 0 1"
-              marks={{ f2: 'sacrifice', g2: 'sacrifice', h2: 'sacrifice' }}
-              label="White king on g1 is in a back-rank checkmate, but may eat one of its pawns on f2, g2 or h2."
-              onTry={() => load(scenarioGame('cannibal-back-rank'), findScenario('cannibal-back-rank') ?? null)}
-            />
-          </div>
         </section>
       </main>
       <Footer />
@@ -426,39 +382,6 @@ export function PlayApp() {
         </Modal>
       )}
     </PieceStyleContext>
-  )
-}
-
-function scenarioGame(id: string): GameRecord {
-  const scenario = findScenario(id)
-  const parsed = scenario ? parseMeanFen(scenario.fen) : null
-  return parsed?.ok ? newGame(parsed.position) : newGame()
-}
-
-function RuleCard({
-  title,
-  text,
-  fen,
-  marks,
-  label,
-  onTry,
-}: {
-  readonly title: string
-  readonly text: string
-  readonly fen: string
-  readonly marks: Parameters<typeof MiniBoard>[0]['marks']
-  readonly label: string
-  readonly onTry: () => void
-}) {
-  return (
-    <article className="card rule-card">
-      <MiniBoard fen={fen} marks={marks} label={label} />
-      <h3>{title}</h3>
-      <p>{text}</p>
-      <button type="button" className="button" onClick={onTry}>
-        Try it
-      </button>
-    </article>
   )
 }
 

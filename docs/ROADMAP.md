@@ -14,14 +14,16 @@ Picnic), move and capture animations, the rules page, and deployment to GitHub P
   - Zobrist hashing and a transposition table;
   - an evaluation that values the original queen above a promoted one and drives a beaten king into
     the corner, where its only moves are suicidal.
-- The board no longer reveals the Royal Kill Zone during play (founder ruling, D-39).
+- The board no longer reveals the Royal Kill Zone during play (founder ruling, D-39), nor points out a
+  winning royal move (D-46).
+
+Shipped after v0.2.0: a welcome page and an interactive tutorial (D-48).
 
 ## Next
 
 - A richer Mean evaluation: Kill Zone control, how exposed each side's sacrifice tier is, king
   hunting in the middlegame.
-- Drag-and-drop moves, sound effects, an Open Graph preview image, PGN-style export, and a guided
-  tutorial built on Scenario Lab.
+- Drag-and-drop moves, sound effects, an Open Graph preview image, and PGN-style export.
 
 ## v0.3: online play
 

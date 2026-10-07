@@ -32,10 +32,11 @@ function resumeAgainstComputer(fen: string, opponent: Opponent): void {
 const computerMoved = () => screen.findByText(/^The computer played .+\. Your move\.$/, {}, { timeout: 5_000 })
 
 describe('playing the computer', () => {
-  it('starts from the hero, shows who is playing, and answers a move', async () => {
+  it('opens the New game dialog from a welcome-page link, shows who is playing, and answers a move', async () => {
     const user = userEvent.setup()
+    window.history.replaceState(null, '', '/play/?new=computer')
     renderPage()
-    await user.click(button('Play the computer'))
+    expect(window.location.search).toBe('') // the request is consumed
     const dialog = screen.getByRole('dialog', { name: 'New game' })
     expect(within(dialog).getByRole('radio', { name: /The computer/ })).toHaveProperty('checked', true)
     await user.click(within(dialog).getByRole('radio', { name: /Nice/ }))
@@ -143,19 +144,25 @@ describe('playing the computer', () => {
     expect(moveList().getAllByRole('listitem')[0]?.textContent).toMatch(/^1\.e4\S+$/)
   })
 
-  it('switches to a game between friends when a scenario is loaded', async () => {
-    const user = userEvent.setup()
+  it('switches to a game between friends when a scenario is opened', async () => {
     resumeAgainstComputer('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', {
       kind: 'computer',
       level: 'nice',
       human: 'white',
     })
+    // The Royal Capture scenario, with Black to move.
+    window.history.replaceState(null, '', '/play/?scenario=royal-capture')
     renderPage()
-    // The first rule card's scenario is Royal Capture, with Black to move.
-    await user.click(screen.getAllByRole('button', { name: 'Try it' })[0] ?? button('Try it'))
     await waitFor(() => {
       expect(status().queryByText(/against the computer/)).toBeNull()
     })
     expect(status().getByText('Black to move')).toBeTruthy()
+  })
+
+  it('suggests a friend when the link asks for one', () => {
+    window.history.replaceState(null, '', '/play/?new=friend')
+    renderPage()
+    const dialog = screen.getByRole('dialog', { name: 'New game' })
+    expect(within(dialog).getByRole('radio', { name: /A friend/ })).toHaveProperty('checked', true)
   })
 })

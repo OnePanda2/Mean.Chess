@@ -37,6 +37,8 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
   Zone.
 - Move hints for normal moves, captures and sacrifices, with special moves explained. Deliberately,
   nothing reveals the Kill Zone or points out a winning royal move: spotting them is the game.
+- A welcome page with two doors: a **tutorial** that teaches Mean Chess in 8 short lessons on a real
+  board (and points newcomers to free guides for regular chess first), or straight to a game.
 - Scenario Lab: curated positions for every rule, plus importing and sharing positions (MeanFEN) and
   whole games.
 - Original piece artwork in four themes: **Mean**, **Sugar** (pink), **Arcade** (8-bit, pixel
@@ -75,8 +77,8 @@ Then open http://localhost:5173.
   future game server. See [docs/ENGINE.md](docs/ENGINE.md).
 - **Computer opponent:** `src/ai` runs an alpha-beta search on its own fast board, which tests prove
   equal to the engine. It runs in a Web Worker. See [docs/AI.md](docs/AI.md).
-- **Interface:** React 19, Vite 8, plain CSS with theme tokens. Two real pages: `/` (play) and
-  `/rules/`.
+- **Interface:** React 19, Vite 8, plain CSS with theme tokens. Four real pages: `/` (welcome),
+  `/play/`, `/tutorial/` and `/rules/`.
 - **Testing:** Vitest. Over 320 tests:
   - every rule and the original brief's acceptance scenarios;
   - published perft numbers;

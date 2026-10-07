@@ -267,7 +267,7 @@ function RuleSection({
         <figure className="rule__diagram">
           <MiniBoard fen={diagram.fen} marks={diagram.marks} label={diagram.label} />
           <figcaption>
-            {diagram.label} <a href={`/?scenario=${diagram.scenario}`}>Try this position →</a>
+            {diagram.label} <a href={`/play/?scenario=${diagram.scenario}`}>Try this position →</a>
           </figcaption>
         </figure>
       )}
