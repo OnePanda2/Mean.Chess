@@ -9,10 +9,14 @@ export function MiniBoard({
   fen,
   marks = {},
   label,
+  decorative = false,
 }: {
   readonly fen: string
   readonly marks?: Readonly<Record<string, Mark>>
-  readonly label: string
+  /** Describes the diagram for screen readers (unless decorative). */
+  readonly label?: string
+  /** A pure illustration, hidden from assistive technology. */
+  readonly decorative?: boolean
 }) {
   const parsed = parseMeanFen(fen)
   if (!parsed.ok) return null
@@ -23,7 +27,10 @@ export function MiniBoard({
     if (sq !== null) marked.set(sq, mark)
   }
   return (
-    <div className="mini-board" role="img" aria-label={label}>
+    <div
+      className="mini-board"
+      {...(decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': label })}
+    >
       {Array.from({ length: 64 }, (_, index) => {
         const sq = squareAt(index % 8, 7 - Math.floor(index / 8))
         const piece = board[sq]

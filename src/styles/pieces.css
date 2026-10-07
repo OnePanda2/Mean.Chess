@@ -1,0 +1,321 @@
+/* Original Mean Chess piece artwork (components/pieces), coloured by theme tokens. */
+.piece-image {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.piece-image--white {
+  --pf: var(--piece-white-fill);
+  --ps: var(--piece-white-stroke);
+  --pd: var(--piece-white-detail);
+  --ph: var(--piece-white-highlight);
+}
+
+.piece-image--black {
+  --pf: var(--piece-black-fill);
+  --ps: var(--piece-black-stroke);
+  --pd: var(--piece-black-detail);
+  --ph: var(--piece-black-highlight);
+}
+
+.piece-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: var(--piece-shadow);
+}
+
+/* Vector set */
+.pa-body {
+  fill: var(--pf);
+  stroke: var(--ps);
+  stroke-width: 3;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 8;
+}
+
+.pa-line {
+  fill: none;
+  stroke: var(--pd);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pa-cut {
+  fill: none;
+  stroke: var(--pd);
+  stroke-width: 5;
+  stroke-linecap: square;
+}
+
+.pa-mark {
+  fill: var(--pd);
+}
+
+.pa-accent {
+  fill: var(--piece-accent);
+  stroke: var(--ps);
+  stroke-width: 1.5;
+}
+
+/* Pixel set: crisp cells at any size. */
+.piece-art--pixel {
+  filter: none;
+}
+
+.px-o {
+  fill: var(--ps);
+}
+
+.px-f {
+  fill: var(--pf);
+}
+
+.px-h {
+  fill: var(--ph);
+}
+
+.px-a {
+  fill: var(--piece-accent);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Motion (Board.tsx). A move slides the piece (board.css); here: what is left behind.
+   A captured or sacrificed piece lingers as a "ghost" for one animation, then fades out.
+   ------------------------------------------------------------------------------------------ */
+.board__ghost {
+  z-index: 0;
+}
+
+.board__ghost--royal {
+  z-index: 2;
+}
+
+.board__ghost .board__art {
+  animation: ghost-taken 360ms var(--move-easing) calc(var(--move-duration) * 0.55) both;
+}
+
+.board__ghost--eaten .board__art {
+  animation: ghost-eaten 460ms ease-in 40ms both;
+}
+
+.board__ghost--royal .board__art {
+  animation: ghost-royal 800ms ease-out calc(var(--move-duration) * 0.6) both;
+}
+
+@keyframes ghost-taken {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.55) rotate(-14deg);
+  }
+}
+
+/* Royal Cannibalism and the victim of a Royal Slaughter: swallowed in a gold flare. */
+@keyframes ghost-eaten {
+  0% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 10px var(--gold)) brightness(1.2);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.15);
+    filter: drop-shadow(0 0 0 var(--gold));
+  }
+}
+
+/* Royal Capture: the fallen king flares and shatters outward. */
+@keyframes ghost-royal {
+  0% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  25% {
+    opacity: 1;
+    transform: scale(1.14) rotate(-4deg);
+    filter: drop-shadow(0 0 14px var(--royal)) brightness(1.35);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.8) rotate(18deg);
+    filter: drop-shadow(0 0 26px var(--royal));
+  }
+}
+
+/* A piece that comes back on undo, or the pieces of a freshly loaded position. */
+.board__piece--appear .board__art {
+  animation: piece-appear 300ms var(--move-easing) both;
+}
+
+@keyframes piece-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A pawn reaching the last rank swells into its new shape once it arrives. */
+.board__piece--promoted .board__art {
+  animation: piece-promote 460ms ease-out var(--move-duration) both;
+}
+
+@keyframes piece-promote {
+  0%,
+  100% {
+    transform: none;
+    filter: none;
+  }
+
+  45% {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 12px var(--gold));
+  }
+}
+
+/* Whole-board flashes for the game's signature moments. */
+.board__flash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.board__flash--royal {
+  animation: flash-royal 950ms ease-out calc(var(--move-duration) * 0.6) both;
+}
+
+.board__flash--sacrifice {
+  animation: flash-sacrifice 700ms ease-out both;
+}
+
+@keyframes flash-royal {
+  0%,
+  100% {
+    background: transparent;
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+
+  18% {
+    background: color-mix(in srgb, var(--royal) 22%, transparent);
+    box-shadow: inset 0 0 90px 12px color-mix(in srgb, var(--royal) 85%, transparent);
+  }
+}
+
+@keyframes flash-sacrifice {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+
+  25% {
+    box-shadow: inset 0 0 60px 6px color-mix(in srgb, var(--gold) 60%, transparent);
+  }
+}
+
+/* Movement switched off in the Themes dialog: everything snaps into place. */
+.board--still .board__piece {
+  transition: none;
+}
+
+.board--still .board__ghost,
+.board--still .board__flash {
+  display: none;
+}
+
+.board--still .board__art {
+  animation: none;
+}
+
+/* Theme-specific motion ----------------------------------------------------------------- */
+
+/* Sugar: the fallen float away. */
+[data-theme='sugar'] .board__ghost--taken .board__art {
+  animation-name: ghost-float;
+  animation-duration: 520ms;
+}
+
+@keyframes ghost-float {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-45%) scale(0.5) rotate(24deg);
+    filter: drop-shadow(0 0 10px var(--royal));
+  }
+}
+
+/* Arcade: captured sprites blink out, like every game from 1985. */
+[data-theme='arcade'] .board__ghost .board__art {
+  animation-name: ghost-blink;
+  animation-duration: 600ms;
+  animation-timing-function: steps(1, end);
+}
+
+[data-theme='arcade'] .board__ghost--royal .board__art {
+  animation-duration: 1000ms;
+}
+
+@keyframes ghost-blink {
+  0%,
+  30%,
+  60% {
+    opacity: 1;
+  }
+
+  15%,
+  45%,
+  75%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Picnic: the fallen hop off the blanket. */
+[data-theme='picnic'] .board__ghost--taken .board__art {
+  animation-name: ghost-hop;
+  animation-duration: 480ms;
+}
+
+@keyframes ghost-hop {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+
+  35% {
+    opacity: 1;
+    transform: translateY(-22%) rotate(-10deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(45%) scale(0.6) rotate(-30deg);
+  }
+}

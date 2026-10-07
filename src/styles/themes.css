@@ -1,0 +1,249 @@
+/* Alternative themes. Each overrides the tokens of styles/tokens.css (the Mean theme) and adds a
+   few touches of its own. Selectors use [data-theme] so a theme also works inside a single preview
+   element (the Themes dialog). Page-level decoration is keyed on html[data-theme] only. */
+
+/* ---------- Sugar: pink, sweet and completely ruthless ---------------------------------- */
+[data-theme='sugar'] {
+  color-scheme: light;
+  --bg: #ffe3ee;
+  --bg-image: radial-gradient(circle, rgb(255 255 255 / 0.8) 2.5px, transparent 3px);
+  --bg-size: 26px 26px;
+  --surface: #fff6fa;
+  --surface-raised: #ffe9f2;
+  --border: #f7c4d9;
+  --border-strong: #f09fc1;
+  --text: #6d1f48;
+  --text-muted: #9c4a75;
+  --error: #c4004f;
+  --backdrop: rgb(109 31 72 / 0.38);
+  --royal: #d6005d;
+  --royal-soft: rgb(214 0 93 / 0.12);
+  --on-royal: #ffffff;
+  --gold: #a855f7;
+  --gold-soft: rgb(168 85 247 / 0.14);
+  --square-light: #fff1f7;
+  --square-dark: #f6a6c9;
+  --square-light-bg: var(--square-light);
+  --square-dark-bg: var(--square-dark);
+  --highlight-last: rgb(168 85 247 / 0.26);
+  --highlight-selected: rgb(168 85 247 / 0.44);
+  --hint-ink: #6d1f48;
+  --mark-ring: #ffffff;
+  --coord-on-light: #d6407f;
+  --coord-on-dark: #ffffff;
+  --tray-bg: #fff1f7;
+  --tray-ink: #9c4a75;
+  --piece-white-fill: #ffffff;
+  --piece-white-stroke: #b02a6b;
+  --piece-white-detail: #ff5fa2;
+  --piece-white-highlight: #ffe3ee;
+  --piece-black-fill: #e2427f;
+  --piece-black-stroke: #5e0f33;
+  --piece-black-detail: #ffe3ee;
+  --piece-black-highlight: #f58ab6;
+  --piece-accent: #a855f7;
+  --piece-shadow: drop-shadow(0 3px 2px rgb(176 42 107 / 0.28));
+  --font-display: 'Pacifico', 'Brush Script MT', cursive;
+  --font-body: ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif;
+  --font-ui: var(--font-body);
+  --display-weight: 400;
+  --display-transform: none;
+  --display-tracking: 0.01em;
+  --radius: 26px;
+  --radius-small: 16px;
+  --radius-button: 999px;
+  --border-width: 1px;
+  --shadow: 0 16px 34px rgb(214 0 93 / 0.18);
+  --button-shadow: none;
+  --move-duration: 280ms;
+  /* A little overshoot: the pieces bounce into place. */
+  --move-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+[data-theme='sugar'] .hero__title {
+  line-height: 1.15;
+}
+
+html[data-theme='sugar'] .hero__eyebrow::after {
+  content: ' ♡';
+}
+
+/* ---------- Arcade: eight bits of betrayal (PICO-8 palette) -------------------------------- */
+[data-theme='arcade'] {
+  color-scheme: dark;
+  --bg: #1d2b53;
+  --bg-image:
+    linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  --bg-size: 8px 8px;
+  --surface: #111a3d;
+  --surface-raised: #26346a;
+  --border: #83769c;
+  --border-strong: #c2c3c7;
+  --text: #fff1e8;
+  --text-muted: #c2c3c7;
+  --error: #ff77a8;
+  --backdrop: rgb(0 0 0 / 0.72);
+  --royal: #ff004d;
+  --royal-soft: rgb(255 0 77 / 0.2);
+  --on-royal: #ffffff;
+  --gold: #ffec27;
+  --gold-soft: rgb(255 236 39 / 0.16);
+  --square-light: #ffccaa;
+  --square-dark: #ab5236;
+  --square-light-bg: var(--square-light);
+  --square-dark-bg: var(--square-dark);
+  --highlight-last: rgb(255 236 39 / 0.4);
+  --highlight-selected: rgb(41 173 255 / 0.6);
+  --hint-ink: #000000;
+  --mark-ring: #000000;
+  --tray-bg: #ffccaa;
+  --tray-ink: #5f574f;
+  --piece-white-fill: #fff1e8;
+  --piece-white-stroke: #000000;
+  --piece-white-detail: #000000;
+  --piece-white-highlight: #ffffff;
+  --piece-black-fill: #1d2b53;
+  --piece-black-stroke: #000000;
+  --piece-black-detail: #29adff;
+  --piece-black-highlight: #83769c;
+  --piece-accent: #ff004d;
+  --piece-shadow: none;
+  --font-display: 'Press Start 2P', ui-monospace, monospace;
+  --font-ui: 'Press Start 2P', ui-monospace, monospace;
+  --font-body: ui-monospace, 'Cascadia Mono', Consolas, 'Courier New', monospace;
+  --display-weight: 400;
+  --display-transform: uppercase;
+  --display-tracking: 0;
+  --radius: 0;
+  --radius-small: 0;
+  --radius-button: 0;
+  --border-width: 3px;
+  --shadow: 6px 6px 0 #000000;
+  --button-shadow: 3px 3px 0 #000000;
+  --move-duration: 240ms;
+  /* Pieces hop square to square instead of gliding. */
+  --move-easing: steps(4, end);
+}
+
+/* CRT scanlines over the whole page. */
+html[data-theme='arcade'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 3px);
+}
+
+/* Press Start 2P is wide: everything set in it runs smaller. */
+[data-theme='arcade'] .hero__title {
+  font-size: clamp(1.5rem, 6vw, 3rem);
+  line-height: 1.3;
+}
+
+[data-theme='arcade'] .hero__tagline {
+  font-size: clamp(0.72rem, 2vw, 1rem);
+  line-height: 1.7;
+}
+
+[data-theme='arcade'] .topbar__brand {
+  font-size: 0.78rem;
+}
+
+[data-theme='arcade'] .button {
+  font-size: 0.56rem;
+  line-height: 1.6;
+}
+
+/* The control grid is too tight for the pixel face: terminal type instead. */
+[data-theme='arcade'] .controls .button {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+[data-theme='arcade'] .card__title,
+[data-theme='arcade'] .section-title,
+[data-theme='arcade'] .modal__header h2,
+[data-theme='arcade'] .rule h2,
+[data-theme='arcade'] .rule-card h3 {
+  font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+  line-height: 1.6;
+}
+
+[data-theme='arcade'] .banner strong,
+[data-theme='arcade'] .hero__eyebrow,
+[data-theme='arcade'] .card__eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+}
+
+[data-theme='arcade'] .button:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+/* ---------- Picnic: a sunny afternoon of regicide ------------------------------------------ */
+[data-theme='picnic'] {
+  color-scheme: light;
+  --bg: #fbf3df;
+  --bg-image:
+    linear-gradient(90deg, rgb(217 75 75 / 0.06) 50%, transparent 50%),
+    linear-gradient(rgb(217 75 75 / 0.06) 50%, transparent 50%);
+  --bg-size: 48px 48px;
+  --surface: #fffdf6;
+  --surface-raised: #fff4de;
+  --border: #ecdcb8;
+  --border-strong: #d9c18f;
+  --text: #3d2a17;
+  --text-muted: #735e42;
+  --error: #c1121f;
+  --backdrop: rgb(61 42 23 / 0.42);
+  /* Cobalt, not red: the royal marks must stand out on red gingham. */
+  --royal: #2148a8;
+  --royal-soft: rgb(33 72 168 / 0.12);
+  --on-royal: #ffffff;
+  --gold: #e6a400;
+  --gold-soft: rgb(230 164 0 / 0.16);
+  --square-light: #fffaf0;
+  --square-dark: #d94b4b;
+  --square-light-bg:
+    linear-gradient(90deg, rgb(217 75 75 / 0.17) 50%, transparent 50%) 0 0 / 25% 25%,
+    linear-gradient(rgb(217 75 75 / 0.17) 50%, transparent 50%) 0 0 / 25% 25%, #fffaf0;
+  --square-dark-bg:
+    linear-gradient(90deg, rgb(255 255 255 / 0.3) 50%, transparent 50%) 0 0 / 25% 25%,
+    linear-gradient(rgb(255 255 255 / 0.3) 50%, transparent 50%) 0 0 / 25% 25%, #d94b4b;
+  --highlight-last: rgb(230 164 0 / 0.4);
+  --highlight-selected: rgb(230 164 0 / 0.6);
+  --hint-ink: #3d2a17;
+  --mark-ring: #3d2a17;
+  --tray-bg: #fff4de;
+  --tray-ink: #735e42;
+  --piece-white-fill: #fffaf0;
+  --piece-white-stroke: #4a2e14;
+  --piece-white-detail: #4a2e14;
+  --piece-white-highlight: #ffffff;
+  --piece-black-fill: #5a3418;
+  --piece-black-stroke: #2b170a;
+  --piece-black-detail: #ffe9c4;
+  --piece-black-highlight: #8a5a33;
+  --piece-accent: #2f8f4e;
+  --piece-shadow: drop-shadow(0 3px 2px rgb(61 42 23 / 0.3));
+  --font-display: 'Fredoka', ui-rounded, system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-ui: var(--font-body);
+  --display-weight: 600;
+  --display-transform: none;
+  --display-tracking: 0.01em;
+  --radius: 18px;
+  --radius-small: 12px;
+  --radius-button: 999px;
+  --border-width: 1px;
+  --shadow: 0 14px 30px rgb(90 52 24 / 0.18);
+  --button-shadow: none;
+  --move-duration: 230ms;
+  --move-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
+}

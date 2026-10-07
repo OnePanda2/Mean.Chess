@@ -48,12 +48,13 @@
 .rule h2 {
   margin: 0 0 10px;
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
   font-size: clamp(1.6rem, 3.6vw, 2.1rem);
   line-height: 1.15;
 }
 
 .rule__number {
-  color: var(--brass);
+  color: var(--gold);
 }
 
 .rule__text p,
@@ -91,7 +92,7 @@
   font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--brass);
+  color: var(--gold);
 }
 
 .notation-list {

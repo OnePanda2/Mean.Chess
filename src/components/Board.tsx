@@ -16,6 +16,7 @@ import {
   type PositionAnalysis,
   type Square,
 } from '../engine/index.ts'
+import type { Transition } from '../app/gameState.ts'
 import { CrownIcon, SacrificeIcon, WarningIcon } from './Icons.tsx'
 import { PieceImage } from './PieceImage.tsx'
 
@@ -51,6 +52,39 @@ const squareAtPlace = (col: number, row: number, flipped: boolean): Square =>
 
 const VISUAL_ORDER = Array.from({ length: 64 }, (_, index) => index)
 
+/** A captured or sacrificed piece, shown for one animation where it stood (styles/pieces.css). */
+interface Ghost {
+  readonly piece: Piece
+  readonly sq: Square
+  readonly variant: 'taken' | 'eaten' | 'royal'
+}
+
+/** What to animate for this transition: ghosts, pieces that reappear, a promotion, a flash. */
+function motionFor(transition: Transition, board: readonly (Piece | null)[]) {
+  const ghosts: Ghost[] = []
+  const appear = new Set<string>()
+  let promoted: string | null = null
+  let flash: 'royal' | 'sacrifice' | null = null
+  const { move } = transition
+  if (transition.kind === 'move' && move) {
+    const royal = move.kind === 'royal-capture' || move.kind === 'royal-slaughter'
+    if (move.captured) {
+      const sq = move.kind === 'en-passant' ? squareAt(fileOf(move.to), rankOf(move.from)) : move.to
+      ghosts.push({ piece: move.captured, sq, variant: royal ? 'royal' : 'taken' })
+    }
+    if (move.sacrificed && move.sacrificeSquare !== undefined) {
+      ghosts.push({ piece: move.sacrificed, sq: move.sacrificeSquare, variant: 'eaten' })
+    }
+    if (move.promotion) promoted = move.piece.id
+    flash = royal ? 'royal' : move.kind === 'self-capture' ? 'sacrifice' : null
+  } else if (transition.from) {
+    // Undo or a new position: pieces that were not on the board a moment ago fade in.
+    const before = new Set(transition.from.board.flatMap((piece) => (piece ? [piece.id] : [])))
+    for (const piece of board) if (piece && !before.has(piece.id)) appear.add(piece.id)
+  }
+  return { ghosts, appear, promoted, flash }
+}
+
 export interface BoardProps {
   readonly position: Position
   readonly analysis: PositionAnalysis
@@ -59,6 +93,10 @@ export interface BoardProps {
   readonly flipped: boolean
   readonly showKillZones: boolean
   readonly interactive: boolean
+  /** The latest change, for animation (gameState.ts). */
+  readonly transition: Transition
+  /** False when the player switched movement off. */
+  readonly animate: boolean
   readonly onSquare: (square: Square) => void
   /** Escape pressed on the board. */
   readonly onDeselect?: () => void
@@ -74,6 +112,8 @@ export function Board({
   flipped,
   showKillZones,
   interactive,
+  transition,
+  animate,
   onSquare,
   onDeselect,
   onHint,
@@ -101,6 +141,11 @@ export function Board({
   board.forEach((piece, sq) => {
     if (piece) pieces.push({ piece, sq })
   })
+  const motion = motionFor(transition, board)
+  const translate = (sq: Square): string => {
+    const { col, row } = placeOf(sq, flipped)
+    return `translate(${col * 100}%, ${row * 100}%)`
+  }
 
   function moveFocus(event: KeyboardEvent<HTMLDivElement>): void {
     const steps: Readonly<Record<string, readonly [number, number]>> = {
@@ -122,7 +167,10 @@ export function Board({
   }
 
   return (
-    <div className={`board${interactive ? '' : ' board--inactive'}`} onKeyDown={moveFocus}>
+    <div
+      className={`board${interactive ? '' : ' board--inactive'}${animate ? '' : ' board--still'}`}
+      onKeyDown={moveFocus}
+    >
       <div className="board__squares" role="group" aria-label="Mean Chess board">
         {VISUAL_ORDER.map((index) => {
           const sq = squareAtPlace(index % 8, Math.floor(index / 8), flipped)
@@ -176,11 +224,28 @@ export function Board({
       </div>
 
       <div className="board__pieces" aria-hidden="true">
+        {motion.ghosts.map((ghost) => (
+          <div
+            key={`ghost-${transition.id}-${ghost.piece.id}`}
+            className={`board__ghost board__ghost--${ghost.variant}`}
+            style={{ transform: translate(ghost.sq) }}
+          >
+            <div className="board__art">
+              <PieceImage piece={ghost.piece} />
+            </div>
+          </div>
+        ))}
         {pieces.map(({ piece, sq }) => {
-          const { col, row } = placeOf(sq, flipped)
+          const classes = [
+            'board__piece',
+            motion.appear.has(piece.id) ? 'board__piece--appear' : '',
+            motion.promoted === piece.id ? 'board__piece--promoted' : '',
+          ]
           return (
-            <div key={piece.id} className="board__piece" style={{ transform: `translate(${col * 100}%, ${row * 100}%)` }}>
-              <PieceImage piece={piece} />
+            <div key={piece.id} className={classes.filter(Boolean).join(' ')} style={{ transform: translate(sq) }}>
+              <div className="board__art">
+                <PieceImage piece={piece} />
+              </div>
             </div>
           )
         })}
@@ -217,6 +282,10 @@ export function Board({
           )
         })}
       </div>
+
+      {motion.flash && (
+        <div key={`flash-${transition.id}`} className={`board__flash board__flash--${motion.flash}`} aria-hidden="true" />
+      )}
     </div>
   )
 }

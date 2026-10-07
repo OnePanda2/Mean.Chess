@@ -27,3 +27,17 @@ export function WarningIcon() {
     </svg>
   )
 }
+
+export function PaletteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M12 2.5C6.5 2.5 2 6.6 2 11.7c0 4 3.2 7.8 7.4 7.8 1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.6-1-2.6 0-.9.8-1.6 1.7-1.6h2.6c3.8 0 7.4-2.3 7.4-6C22 5.7 17.6 2.5 12 2.5z"
+        fill="currentColor"
+      />
+      <circle cx="7" cy="10" r="1.6" fill="var(--surface)" />
+      <circle cx="11" cy="6.5" r="1.6" fill="var(--surface)" />
+      <circle cx="16" cy="7.5" r="1.6" fill="var(--surface)" />
+    </svg>
+  )
+}

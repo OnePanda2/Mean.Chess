@@ -4,10 +4,10 @@
   width: min(100%, 700px, calc(100dvh - 132px));
   min-width: 260px;
   aspect-ratio: 1 / 1;
-  border-radius: 6px;
+  border-radius: min(6px, var(--radius-small));
   overflow: hidden;
   box-shadow:
-    0 0 0 1px var(--border-strong),
+    0 0 0 var(--border-width) var(--border-strong),
     var(--shadow);
   user-select: none;
   touch-action: manipulation;
@@ -32,13 +32,24 @@
   inset: 0;
 }
 
-.board__piece {
+/* Pieces and the ghosts of captured pieces share one positioning scheme: a transform per square. */
+.board__piece,
+.board__ghost {
   position: absolute;
   top: 0;
   left: 0;
   width: 12.5%;
   height: 12.5%;
-  transition: transform 170ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.board__piece {
+  z-index: 1;
+  transition: transform var(--move-duration) var(--move-easing);
+}
+
+.board__art {
+  width: 100%;
+  height: 100%;
 }
 
 .board--inactive .square {
@@ -52,13 +63,13 @@
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: var(--square-dark);
+  background: var(--square-dark-bg);
   font: inherit;
   cursor: default;
 }
 
 .square--light {
-  background: var(--square-light);
+  background: var(--square-light-bg);
 }
 
 .square--movable {
@@ -66,7 +77,7 @@
 }
 
 .square:focus-visible {
-  outline: 3px solid var(--brass);
+  outline: 3px solid var(--gold);
   outline-offset: -3px;
   z-index: 1;
 }
@@ -76,18 +87,18 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgb(208 171 82 / 0.32);
+  background: var(--highlight-last);
 }
 
 .square--selected::after {
-  background: rgb(208 171 82 / 0.55);
+  background: var(--highlight-selected);
 }
 
 .square--check::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle, rgb(215 38 63 / 0.95) 0%, rgb(215 38 63 / 0.55) 40%, transparent 72%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--royal) 95%, transparent) 0%, color-mix(in srgb, var(--royal) 55%, transparent) 40%, transparent 72%);
 }
 
 .coord {
@@ -110,26 +121,11 @@
 }
 
 .square--light .coord {
-  color: var(--square-dark);
+  color: var(--coord-on-light, var(--square-dark));
 }
 
 .square--dark .coord {
-  color: var(--square-light);
-}
-
-/* Pieces */
-.piece-image {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.piece-image img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  -webkit-user-drag: none;
+  color: var(--coord-on-dark, var(--square-light));
 }
 
 .promoted-mark {
@@ -139,8 +135,8 @@
   width: 20%;
   height: 20%;
   border-radius: 50%;
-  background: var(--brass);
-  box-shadow: 0 0 0 2px #0b0b0d;
+  background: var(--gold);
+  box-shadow: 0 0 0 2px var(--mark-ring);
 }
 
 /* Hints: four levels of emphasis, each with its own shape (never colour alone). */
@@ -156,23 +152,23 @@
 .hint--dot {
   inset: 37%;
   border-radius: 50%;
-  background: rgb(14 14 18 / 0.38);
+  background: color-mix(in srgb, var(--hint-ink) 38%, transparent);
 }
 
 /* 1b. Capture: a ring around the target. */
 .hint--ring {
   inset: 3%;
   border-radius: 50%;
-  background: radial-gradient(circle, transparent 60%, rgb(14 14 18 / 0.42) 61%, rgb(14 14 18 / 0.42) 72%, transparent 73%);
+  background: radial-gradient(circle, transparent 60%, color-mix(in srgb, var(--hint-ink) 42%, transparent) 61%, color-mix(in srgb, var(--hint-ink) 42%, transparent) 72%, transparent 73%);
 }
 
 /* 2. Special Mean move: Royal Cannibalism, a brass dashed ring plus an icon. */
 .hint--sacrifice {
   inset: 5%;
-  border: 3px dashed var(--brass);
+  border: 3px dashed var(--gold);
   border-radius: 50%;
-  background: rgb(208 171 82 / 0.18);
-  color: var(--brass);
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  color: var(--gold);
 }
 
 .hint--sacrifice svg {
@@ -189,9 +185,9 @@
   inset: 0;
   display: grid;
   place-items: start end;
-  background: rgb(215 38 63 / 0.5);
-  box-shadow: inset 0 0 0 3px var(--crimson);
-  color: #fff;
+  background: color-mix(in srgb, var(--royal) 50%, transparent);
+  box-shadow: inset 0 0 0 3px var(--royal);
+  color: var(--on-royal);
   animation: win-pulse 1.4s ease-in-out infinite;
 }
 
@@ -209,7 +205,7 @@
   transform: translateX(-50%);
   padding: 1px 5px;
   border-radius: 4px;
-  background: var(--crimson);
+  background: var(--royal);
   font-size: clamp(7px, 1.4vmin, 11px);
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -218,7 +214,7 @@
 
 @keyframes win-pulse {
   50% {
-    background: rgb(215 38 63 / 0.32);
+    background: color-mix(in srgb, var(--royal) 30%, transparent);
   }
 }
 
@@ -228,7 +224,7 @@
   right: 3%;
   width: 30%;
   height: 30%;
-  color: var(--crimson);
+  color: var(--royal);
   filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.75));
 }
 
@@ -243,16 +239,16 @@
   inset: 6%;
   border-radius: 50%;
   box-shadow:
-    0 0 0 3px var(--brass),
-    0 0 14px 2px rgb(208 171 82 / 0.75);
+    0 0 0 3px var(--gold),
+    0 0 14px 2px color-mix(in srgb, var(--gold) 75%, transparent);
   animation: eligible-glow 1.6s ease-in-out infinite;
 }
 
 @keyframes eligible-glow {
   50% {
     box-shadow:
-      0 0 0 3px var(--brass),
-      0 0 4px 0 rgb(208 171 82 / 0.4);
+      0 0 0 3px var(--gold),
+      0 0 4px 0 color-mix(in srgb, var(--gold) 40%, transparent);
   }
 }
 
@@ -260,14 +256,14 @@
 .hint--threat {
   inset: 2%;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--crimson);
-  background: repeating-linear-gradient(45deg, rgb(215 38 63 / 0.35) 0 4px, transparent 4px 9px);
+  box-shadow: 0 0 0 3px var(--royal);
+  background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--royal) 35%, transparent) 0 4px, transparent 4px 9px);
 }
 
 /* Optional overlay: squares the enemy king can strike. */
 .hint--zone {
   inset: 0;
-  background: repeating-linear-gradient(-45deg, rgb(215 38 63 / 0.3) 0 5px, transparent 5px 11px);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--royal) 30%, transparent) 0 5px, transparent 5px 11px);
 }
 
 /* Static diagram boards */
@@ -284,11 +280,11 @@
 
 .mini-square {
   position: relative;
-  background: var(--square-dark);
+  background: var(--square-dark-bg);
 }
 
 .mini-square.square--light {
-  background: var(--square-light);
+  background: var(--square-light-bg);
 }
 
 .mini-square .piece-image {
@@ -300,15 +296,15 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgb(215 38 63 / 0.45);
-  box-shadow: inset 0 0 0 2px var(--crimson);
+  background: color-mix(in srgb, var(--royal) 45%, transparent);
+  box-shadow: inset 0 0 0 2px var(--royal);
 }
 
 .mini-square--sacrifice::after {
   content: '';
   position: absolute;
   inset: 6%;
-  border: 2px dashed var(--brass);
+  border: 2px dashed var(--gold);
   border-radius: 50%;
 }
 
@@ -316,7 +312,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(-45deg, rgb(215 38 63 / 0.35) 0 3px, transparent 3px 7px);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--royal) 35%, transparent) 0 3px, transparent 3px 7px);
 }
 
 .mini-mark {
@@ -326,16 +322,16 @@
   z-index: 1;
   width: 38%;
   height: 38%;
-  color: #fff;
+  color: var(--on-royal);
   filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.8));
 }
 
 .mini-square--sacrifice .mini-mark {
-  color: var(--brass);
+  color: var(--gold);
 }
 
 .mini-square--danger .mini-mark {
-  color: var(--crimson);
+  color: var(--royal);
 }
 
 .mini-mark svg {

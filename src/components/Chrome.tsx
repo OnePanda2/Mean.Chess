@@ -1,9 +1,9 @@
 import { RULES_VERSION } from '../engine/index.ts'
-import { CrownIcon } from './Icons.tsx'
+import { CrownIcon, PaletteIcon } from './Icons.tsx'
 
 const REPOSITORY = 'https://github.com/OnePanda2/Mean.Chess'
 
-export function TopBar({ current }: { readonly current: 'play' | 'rules' }) {
+export function TopBar({ current, onTheme }: { readonly current: 'play' | 'rules'; readonly onTheme: () => void }) {
   return (
     <header className="topbar">
       <a className="topbar__brand" href="/" aria-label="Mean Chess home">
@@ -29,6 +29,12 @@ export function TopBar({ current }: { readonly current: 'play' | 'rules' }) {
               Source
             </a>
           </li>
+          <li>
+            <button type="button" className="topbar__theme" onClick={onTheme}>
+              <PaletteIcon />
+              <span>Theme</span>
+            </button>
+          </li>
         </ul>
       </nav>
     </header>
@@ -45,7 +51,8 @@ export function Footer() {
         </a>
       </p>
       <p className="muted">
-        Piece artwork by Colin M.L. Burnett (Cburnett), used under the BSD licence.
+        Original piece artwork. Display type: Cormorant Garamond, Pacifico, Press Start 2P and Fredoka (SIL Open
+        Font License).
       </p>
     </footer>
   )

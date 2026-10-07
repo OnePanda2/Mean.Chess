@@ -1,13 +1,19 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { RULES_VERSION } from '../engine/index.ts'
 import { Footer, TopBar } from '../components/Chrome.tsx'
 import { MiniBoard, type Mark } from '../components/MiniBoard.tsx'
+import { ThemeDialog } from '../components/ThemeDialog.tsx'
+import { PieceStyleContext } from '../components/pieces/pieceStyle.ts'
+import { useAppearance } from './appearance.ts'
+import { themeById } from './themes.ts'
 
 /** The rules page (handoff §29). Formal text: the canonical source is docs/RULES.md. */
 export function RulesApp() {
+  const [appearance, setAppearance] = useAppearance()
+  const [themeOpen, setThemeOpen] = useState(false)
   return (
-    <>
-      <TopBar current="rules" />
+    <PieceStyleContext value={themeById(appearance.theme).pieceStyle}>
+      <TopBar current="rules" onTheme={() => setThemeOpen(true)} />
       <main id="main" className="rules">
         <header className="rules__header">
           <p className="hero__eyebrow">Specification</p>
@@ -222,7 +228,10 @@ export function RulesApp() {
         </RuleSection>
       </main>
       <Footer />
-    </>
+      {themeOpen && (
+        <ThemeDialog appearance={appearance} onChange={setAppearance} onClose={() => setThemeOpen(false)} />
+      )}
+    </PieceStyleContext>
   )
 }
 

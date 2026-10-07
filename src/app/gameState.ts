@@ -9,6 +9,7 @@ import {
   undo,
   type GameRecord,
   type Move,
+  type Position,
   type PromotionType,
   type Square,
 } from '../engine/index.ts'
@@ -18,6 +19,20 @@ import type { Scenario } from './scenarios.ts'
 export interface PendingPromotion {
   readonly from: Square
   readonly to: Square
+}
+
+/**
+ * What just changed on the board, so it can animate the right thing: a move (slide, capture,
+ * sacrifice), an undo (pieces slide back, taken pieces reappear) or a reset (a new position).
+ */
+export interface Transition {
+  /** Increases with every change; animations are keyed by it so they play once. */
+  readonly id: number
+  readonly kind: 'move' | 'undo' | 'reset'
+  /** The position shown before the change; null when the page first loads. */
+  readonly from: Position | null
+  /** The move played (kind 'move' only). */
+  readonly move: Move | null
 }
 
 /** Everything the play page remembers. The engine stays the only authority on rules. */
@@ -31,6 +46,7 @@ export interface GameState {
   readonly showKillZones: boolean
   /** The Scenario Lab position being played, if any. */
   readonly scenario: Scenario | null
+  readonly transition: Transition
 }
 
 export type GameAction =
@@ -59,8 +75,13 @@ export function createState(game: GameRecord, options: Partial<GameState> = {}):
     flipped: false,
     showKillZones: false,
     scenario: null,
+    transition: { id: 0, kind: 'reset', from: null, move: null },
     ...options,
   }
+}
+
+function next(state: GameState, kind: Transition['kind'], move: Move | null = null): Transition {
+  return { id: state.transition.id + 1, kind, from: currentPosition(state.game), move }
 }
 
 function withMove(state: GameState, move: Move): GameState {
@@ -71,6 +92,7 @@ function withMove(state: GameState, move: Move): GameState {
     notation: [...state.notation, toMcn(before, move)],
     selected: null,
     promotion: null,
+    transition: next(state, 'move', move),
   }
 }
 
@@ -109,10 +131,26 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, selected: null }
     case 'undo': {
       const game = undo(state.game)
-      return { ...state, game, notation: state.notation.slice(0, game.moves.length), selected: null, promotion: null }
+      if (game === state.game) return state
+      return {
+        ...state,
+        game,
+        notation: state.notation.slice(0, game.moves.length),
+        selected: null,
+        promotion: null,
+        transition: game.moves.length === state.game.moves.length ? state.transition : next(state, 'undo'),
+      }
     }
     case 'new-game':
-      return { ...state, game: newGame(), notation: [], selected: null, promotion: null, scenario: null }
+      return {
+        ...state,
+        game: newGame(),
+        notation: [],
+        selected: null,
+        promotion: null,
+        scenario: null,
+        transition: next(state, 'reset'),
+      }
     case 'load':
       return {
         ...state,
@@ -121,6 +159,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         selected: null,
         promotion: null,
         scenario: action.scenario,
+        transition: next(state, 'reset'),
       }
     case 'resign':
       return { ...state, game: resign(state.game, currentPosition(state.game).sideToMove), selected: null }

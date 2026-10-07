@@ -1,34 +1,79 @@
-/* Self-hosted display face (SIL OFL 1.1). Latin, bold only: ~22 KB. */
+/* Self-hosted display faces (SIL OFL 1.1, see THIRD_PARTY_NOTICES.md). A face is only
+   downloaded when a theme actually uses it. */
 @import '@fontsource/cormorant-garamond/latin-700.css';
+@import '@fontsource/pacifico/latin-400.css';
+@import '@fontsource/press-start-2p/latin-400.css';
+@import '@fontsource/fredoka/latin-600.css';
 
-/* Design tokens. Direction: dark, premium, restrained (docs/BLUEPRINT.md §5.6).
-   Two accents, one meaning each: crimson = royal, check, danger; brass = sacrifice and focus. */
-:root {
+/* The Mean theme: the default, and the base every other theme overrides (styles/themes.css).
+   Two accents, one meaning each: --royal = royal moves, check, danger; --gold = sacrifice, focus,
+   highlights. Themes change the values, never the meanings. */
+:root,
+[data-theme='mean'] {
   color-scheme: dark;
 
+  /* Page */
   --bg: #0b0b0d;
+  --bg-image: none;
+  --bg-size: auto;
   --surface: #16161b;
   --surface-raised: #1f1f26;
   --border: #2b2b34;
   --border-strong: #3b3b47;
-
   --text: #ece7de;
   --text-muted: #a8a197;
+  --error: #ff8a9b;
+  --backdrop: rgb(0 0 0 / 0.68);
 
+  /* Accents */
+  --royal: #d7263f;
+  --royal-soft: rgb(215 38 63 / 0.16);
+  --on-royal: #ffffff;
+  --gold: #d0ab52;
+  --gold-soft: rgb(208 171 82 / 0.18);
+
+  /* Board */
   --square-light: #d6cebf;
   --square-dark: #6e6457;
+  --square-light-bg: var(--square-light);
+  --square-dark-bg: var(--square-dark);
+  --highlight-last: rgb(208 171 82 / 0.32);
+  --highlight-selected: rgb(208 171 82 / 0.55);
+  --hint-ink: #0e0e12;
+  --mark-ring: #0b0b0d;
+  --tray-bg: rgb(214 206 191 / 0.9);
+  --tray-ink: #5b544a;
 
-  --crimson: #d7263f;
-  --crimson-soft: rgb(215 38 63 / 0.16);
-  --brass: #d0ab52;
-  --brass-soft: rgb(208 171 82 / 0.18);
+  /* Pieces (original artwork, coloured per theme) */
+  --piece-white-fill: #f3ede1;
+  --piece-white-stroke: #141216;
+  --piece-white-detail: #141216;
+  --piece-white-highlight: #ffffff;
+  --piece-black-fill: #26222b;
+  --piece-black-stroke: #08070a;
+  --piece-black-detail: #d9cfc0;
+  --piece-black-highlight: #514b59;
+  --piece-accent: #d7263f;
+  --piece-shadow: drop-shadow(0 2px 2px rgb(0 0 0 / 0.35));
 
+  /* Type */
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-ui: var(--font-body);
+  --display-weight: 700;
+  --display-transform: uppercase;
+  --display-tracking: 0.06em;
 
+  /* Shape and motion */
   --radius: 14px;
   --radius-small: 9px;
+  --radius-button: 999px;
+  --border-width: 1px;
+  --shadow: 0 18px 40px rgb(0 0 0 / 0.5);
+  --button-shadow: none;
+  --move-duration: 220ms;
+  --move-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
+
   --gutter: 16px;
   --page-width: 1240px;
-  --shadow: 0 18px 40px rgb(0 0 0 / 0.5);
 }

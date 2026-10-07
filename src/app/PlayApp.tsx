@@ -18,13 +18,17 @@ import { Modal } from '../components/Modal.tsx'
 import { PromotionDialog } from '../components/PromotionDialog.tsx'
 import { RulesSummary } from '../components/RulesSummary.tsx'
 import { ScenarioLab } from '../components/ScenarioLab.tsx'
+import { ThemeDialog } from '../components/ThemeDialog.tsx'
+import { PieceStyleContext } from '../components/pieces/pieceStyle.ts'
 import { CapturedPieces, MoveList, StatusPanel } from '../components/SidePanel.tsx'
+import { useAppearance } from './appearance.ts'
 import { createState, gameReducer, type GameState } from './gameState.ts'
 import { findScenario, type Scenario } from './scenarios.ts'
 import { loadPreferences, loadSavedGame, saveGameLocally, savePreferences } from './storage.ts'
 import { outcomeMessage, sideName } from './text.ts'
+import { themeById } from './themes.ts'
 
-type Dialog = 'none' | 'scenarios' | 'rules' | 'new-game' | 'resign' | 'draw'
+type Dialog = 'none' | 'scenarios' | 'rules' | 'theme' | 'new-game' | 'resign' | 'draw'
 
 interface HoverHint {
   readonly selected: Square | null
@@ -55,6 +59,7 @@ function initialState(): GameState {
 
 export function PlayApp() {
   const [state, dispatch] = useReducer(gameReducer, undefined, initialState)
+  const [appearance, setAppearance] = useAppearance()
   const [dialog, setDialog] = useState<Dialog>('none')
   // The hovered target's explanation, tied to the selection and ply it was computed for.
   const [hover, setHover] = useState<HoverHint | null>(null)
@@ -104,8 +109,8 @@ export function PlayApp() {
     : `${lastMove ? `${state.notation.at(-1) ?? ''}. ` : ''}${sideName(position.sideToMove)} to move.`
 
   return (
-    <>
-      <TopBar current="play" />
+    <PieceStyleContext value={themeById(appearance.theme).pieceStyle}>
+      <TopBar current="play" onTheme={() => setDialog('theme')} />
       <main id="main">
         <section className="hero">
           <p className="hero__eyebrow">A chess variant</p>
@@ -142,6 +147,8 @@ export function PlayApp() {
               flipped={state.flipped}
               showKillZones={state.showKillZones}
               interactive={!over}
+              transition={state.transition}
+              animate={appearance.animations}
               onSquare={(square) => {
                 dispatch({ type: 'square', square })
               }}
@@ -259,6 +266,9 @@ export function PlayApp() {
         />
       )}
       {dialog === 'rules' && <RulesSummary onClose={() => setDialog('none')} />}
+      {dialog === 'theme' && (
+        <ThemeDialog appearance={appearance} onChange={setAppearance} onClose={() => setDialog('none')} />
+      )}
       {dialog === 'new-game' && (
         <Confirm
           title="Start a new game?"
@@ -314,7 +324,7 @@ export function PlayApp() {
           </div>
         </Modal>
       )}
-    </>
+    </PieceStyleContext>
   )
 }
 
