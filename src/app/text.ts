@@ -55,24 +55,18 @@ export function outcomeDetail(outcome: Outcome, opponent: Opponent): string {
   return outcomeMessage(outcome).detail
 }
 
-export type StatusTone = 'win' | 'sacrifice' | 'check'
+export type StatusTone = 'sacrifice' | 'check'
 
 export interface Status extends Message {
   readonly tone: StatusTone
 }
 
 /**
- * The most important thing about the position for the player to move, if anything. It never warns
- * about the Royal Kill Zone, before or after a move (DECISIONS.md D-39).
+ * The most important thing about the position for the player to move, if anything. It never
+ * mentions the Royal Kill Zone, before or after a move (D-39), and never announces a Royal Capture
+ * or Slaughter waiting to be played: the player has to spot it (D-46).
  */
 export function statusOf(analysis: PositionAnalysis): Status | null {
-  if (analysis.royal) {
-    return {
-      tone: 'win',
-      title: analysis.royal.kind === 'royal-slaughter' ? 'Royal Slaughter available' : 'Royal Capture available',
-      detail: 'Your king can take the enemy king and win. Select your king.',
-    }
-  }
   if (analysis.desperate && analysis.cannibalism.length > 0) {
     return {
       tone: 'sacrifice',

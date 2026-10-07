@@ -15,14 +15,15 @@ import {
   type Square,
 } from '../engine/index.ts'
 import type { Transition } from '../app/gameState.ts'
-import { CrownIcon, SacrificeIcon } from './Icons.tsx'
+import { SacrificeIcon } from './Icons.tsx'
 import { PieceImage } from './PieceImage.tsx'
 
 /**
- * How a legal target is marked. Nothing marks a move that walks into the Royal Kill Zone: spotting
- * it is part of the game (docs/DECISIONS.md D-39).
+ * How a legal target is marked. Nothing marks a move that walks into the Royal Kill Zone (D-39), and
+ * a Royal Capture or Slaughter looks like any ordinary capture, with no "wins the game" text (D-46):
+ * spotting both is part of the game.
  */
-type HintBase = 'move' | 'capture' | 'sacrifice' | 'win'
+type HintBase = 'move' | 'capture' | 'sacrifice'
 
 interface Hint {
   readonly base: HintBase
@@ -31,9 +32,10 @@ interface Hint {
 }
 
 function hintFor(move: Move, analysis: PositionAnalysis): Hint {
+  if (move.kind === 'royal-capture' || move.kind === 'royal-slaughter') {
+    return { base: 'capture', label: 'capture', explanation: null }
+  }
   const explanation = explainMove(analysis, move)
-  if (move.kind === 'royal-capture') return { base: 'win', label: 'Royal Capture, wins the game', explanation }
-  if (move.kind === 'royal-slaughter') return { base: 'win', label: 'Royal Slaughter, wins the game', explanation }
   if (move.kind === 'self-capture') {
     return { base: 'sacrifice', label: `sacrifice your ${pieceName(move.sacrificed)} (Royal Cannibalism)`, explanation }
   }
@@ -251,12 +253,6 @@ export function Board({
               {hint?.base === 'sacrifice' && (
                 <span className="hint hint--sacrifice">
                   <SacrificeIcon />
-                </span>
-              )}
-              {hint?.base === 'win' && (
-                <span className="hint hint--win">
-                  <CrownIcon />
-                  <span className="hint__label">Win</span>
                 </span>
               )}
             </div>

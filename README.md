@@ -35,8 +35,8 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
 - A computer opponent at three levels: **Nice**, **Mean** and **Ruthless**. It thinks in a Web
   Worker, so the page never freezes, and it will take your king the moment you step into its Kill
   Zone.
-- Move hints for normal moves, captures, sacrifices and winning royal captures, with every special
-  move explained. Deliberately, nothing reveals the Kill Zone.
+- Move hints for normal moves, captures and sacrifices, with special moves explained. Deliberately,
+  nothing reveals the Kill Zone or points out a winning royal move: spotting them is the game.
 - Scenario Lab: curated positions for every rule, plus importing and sharing positions (MeanFEN) and
   whole games.
 - Original piece artwork in four themes: **Mean**, **Sugar** (pink), **Arcade** (8-bit, pixel

@@ -264,7 +264,6 @@
   text-transform: uppercase;
 }
 
-.banner--win,
 .banner--check {
   border-left-color: var(--royal);
 }

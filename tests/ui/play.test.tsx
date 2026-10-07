@@ -67,9 +67,14 @@ describe('the play page', () => {
       document.querySelectorAll('.board__hints .hint--dot').length,
     )
     await user.click(square('f3'))
-    expect(status().getByText('Royal Capture available')).toBeTruthy()
+    // Nothing announces the capture now waiting for White: the player has to spot it (D-46).
+    expect(status().queryByText(/available/)).toBeNull()
+    expect(document.querySelectorAll('.status-card .banner')).toHaveLength(0)
     await user.click(square('h1'))
-    expect(square('f3').getAttribute('aria-label')).toContain('Royal Capture, wins the game')
+    // Selecting the king shows the Royal Capture like any ordinary capture: no crown, no "Win".
+    expect(square('f3').getAttribute('aria-label')).toBe('f3, black king, capture')
+    expect(document.querySelectorAll('.board__hints .hint--ring')).toHaveLength(1)
+    expect(document.querySelectorAll('.board__hints .hint--win')).toHaveLength(0)
     await user.click(square('f3'))
     const dialog = screen.getByRole('dialog', { name: 'White wins' })
     expect(within(dialog).getByText(/Royal Capture/)).toBeTruthy()
