@@ -1,5 +1,7 @@
 # MEAN CHESS — Final Blueprint
 
+> **Historical document.** This was the plan written before the build (2026-10-07). The living documents are [RULES.md](RULES.md), [DECISIONS.md](DECISIONS.md), [ENGINE.md](ENGINE.md), [ROADMAP.md](ROADMAP.md) and [DEPLOYMENT.md](DEPLOYMENT.md). Where they differ from this plan (for example: original piece artwork instead of Cburnett, four themes, animations), they are current.
+
 **Version:** 1.0 · 2026-10-07
 **Built from:** `docs/archive/HANDOFF-v0.md` (founder brief, originally `MEAN_CHESS_CLAUDE_HANDOFF.md`), research done on 2026-10-07 (evidence in `tools/research/`), and three founder decisions recorded on 2026-10-07
 **Precedence:** where this document and the handoff disagree, this document wins. Every deviation is listed in §1.
