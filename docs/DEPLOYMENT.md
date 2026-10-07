@@ -18,9 +18,9 @@ passes.
 |---|---|---|---|
 | Enable Pages, source "GitHub Actions" | maintainer | `gh api -X POST repos/OnePanda2/Mean.Chess/pages -f build_type=workflow` | Done 2026-10-07 |
 | Set the custom domain **before** DNS (takeover protection) | maintainer | `gh api -X PUT repos/OnePanda2/Mean.Chess/pages -f cname=meanchess.siddheshthapa.com` | Done 2026-10-07 |
-| Add the DNS record | domain owner | Namecheap steps below | |
+| Add the DNS record | domain owner | Namecheap steps below | Done 2026-10-07 |
 | Verify the apex domain with GitHub (recommended) | domain owner | Steps below | |
-| Enforce HTTPS once the certificate exists | maintainer | `gh api -X PUT repos/OnePanda2/Mean.Chess/pages -F https_enforced=true` | |
+| Enforce HTTPS once the certificate exists | maintainer | `gh api -X PUT repos/OnePanda2/Mean.Chess/pages -F https_enforced=true` | Done 2026-10-07 |
 
 `public/CNAME` contains the domain for clarity only: deployments through Actions ignore it. The
 repository setting is what counts.
@@ -52,12 +52,18 @@ Verifying the apex domain also protects its immediate subdomains (`meanchess`, `
 ```bash
 nslookup meanchess.siddheshthapa.com
 gh api repos/OnePanda2/Mean.Chess/pages
+gh api repos/OnePanda2/Mean.Chess/pages/health
+curl -I http://meanchess.siddheshthapa.com/
 gh run list -R OnePanda2/Mean.Chess -L 5
 ```
 
+- `pages` shows the certificate under `https_certificate.state`; it ends at `approved`.
+- `pages/health` runs GitHub's DNS check.
+- The `curl` should answer `301` to the `https://` address.
+
 DNS usually propagates within minutes (Namecheap says to allow about 30). GitHub then issues a Let's
 Encrypt certificate, usually within an hour and occasionally up to 24. `siddheshthapa.com` has no CAA
-records, so nothing blocks issuance.
+records, so nothing blocks issuance. GitHub renews the certificate automatically.
 
 ## Troubleshooting
 
@@ -65,6 +71,12 @@ records, so nothing blocks issuance.
   `gh auth refresh -h github.com -s workflow`, then `gh auth setup-git`, and push again.
 - **The deploy job says Pages is not enabled:** run the first setup step, then re-run the workflow
   (`gh run rerun <id>`).
+- **DNS works but no certificate appears** (`https_certificate` stays `null`):
+  - Cause: GitHub requests the certificate only when the domain is saved. Because the domain is saved
+    before DNS exists (D-37), that first attempt finds no DNS.
+  - Re-saving the same value doesn't help. Remove the domain and add it back:
+    `gh api -X PUT repos/OnePanda2/Mean.Chess/pages -F cname=null`, then the second setup step again.
+  - On 2026-10-07 the certificate was approved within a minute of doing this.
 - **The site loads without styles at `onepanda2.github.io/Mean.Chess/`:** expected. `base` is `/`
   for the custom domain, and that URL redirects there once DNS is live.
 
