@@ -5,8 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-const DETERMINISM = 'The rules engine must be deterministic (see docs/BLUEPRINT.md §4.8).'
-const FRAMEWORK_FREE = 'The rules engine must stay framework-free (see docs/BLUEPRINT.md §4.8).'
+const DETERMINISM =
+  'The rules engine and the computer opponent must be deterministic: pass a clock or seed in (docs/ENGINE.md, docs/AI.md).'
+const FRAMEWORK_FREE = 'The rules engine and the computer opponent must stay framework-free (docs/ENGINE.md, docs/AI.md).'
 
 export default defineConfig([
   // Research scripts are throwaway evidence, not product code.
@@ -44,9 +45,10 @@ export default defineConfig([
     languageOptions: { globals: globals.browser },
   },
 
-  // The engine boundary: no UI, no DOM, no randomness, no clock.
+  // The engine and computer-opponent boundary: no UI, no DOM, no randomness, no clock. The AI may
+  // use the engine (through src/engine/index.ts); the engine never uses the AI.
   {
-    files: ['src/engine/**/*.ts'],
+    files: ['src/engine/**/*.ts', 'src/ai/**/*.ts'],
     languageOptions: { globals: {} },
     rules: {
       'no-restricted-imports': [
@@ -60,10 +62,10 @@ export default defineConfig([
       ],
       'no-restricted-globals': [
         'error',
-        ...['window', 'document', 'localStorage', 'sessionStorage', 'navigator', 'fetch'].map((name) => ({
-          name,
-          message: FRAMEWORK_FREE,
-        })),
+        ...['window', 'document', 'localStorage', 'sessionStorage', 'navigator', 'fetch', 'self', 'postMessage'].map(
+          (name) => ({ name, message: FRAMEWORK_FREE }),
+        ),
+        { name: 'performance', message: DETERMINISM },
       ],
       'no-restricted-properties': [
         'error',
@@ -73,6 +75,22 @@ export default defineConfig([
       'no-restricted-syntax': [
         'error',
         { selector: "NewExpression[callee.name='Date']", message: DETERMINISM },
+      ],
+    },
+  },
+
+  // The rules engine stands alone: it never depends on the computer opponent.
+  {
+    files: ['src/engine/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['react', 'react/*', 'react-dom', 'react-dom/*'], message: FRAMEWORK_FREE },
+            { group: ['**/app/**', '**/components/**', '**/styles/**', '**/ai/**'], message: FRAMEWORK_FREE },
+          ],
+        },
       ],
     },
   },

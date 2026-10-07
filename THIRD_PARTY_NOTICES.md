@@ -22,6 +22,12 @@ licence metadata.
 |---|---|
 | React, React DOM | MIT |
 
+## Ideas borrowed by the computer opponent
+
+The computer opponent's piece-square tables follow Tomasz Michniewski's *Simplified Evaluation
+Function*, as published on the [Chess Programming Wiki](https://www.chessprogramming.org). The pawn
+tables, and everything Mean Chess adds, are this project's own.
+
 ## Development-only tools (not shipped)
 
 Vite, Vitest, TypeScript, ESLint, Testing Library and jsdom are MIT or Apache-2.0. chess.js (BSD-2-Clause)
