@@ -1,7 +1,7 @@
 {
   "name": "mean-chess",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Mean Chess: chess, but your king is allowed to eat his own army.",
   "license": "MIT",
   "type": "module",
