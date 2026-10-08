@@ -106,6 +106,8 @@ describe('the tutorial page', () => {
       lesson: 0,
       finished: true,
     })
+    // Lessons never count towards the Auto difficulty (D-50).
+    expect(window.localStorage.getItem('mean-chess:skill:v1')).toBeNull()
     // Every lesson stays one click away.
     const list = within(screen.getByRole('region', { name: 'Revisit a lesson' }))
     await user.click(list.getByRole('button', { name: 'Royal Cannibalism' }))

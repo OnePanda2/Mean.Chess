@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { PlayApp } from '../../src/app/PlayApp.tsx'
 import { ComputerContext, inlineClient } from '../../src/app/computer.ts'
 import type { Opponent } from '../../src/app/opponent.ts'
-import { exportGame, newGame, parseMeanFen } from '../../src/engine/index.ts'
+import { exportGame, newGame, parseMeanFen, play } from '../../src/engine/index.ts'
 
 const square = (name: string) => screen.getByRole('button', { name: new RegExp(`^${name},`) })
 const status = () => within(screen.getByRole('region', { name: 'Game status' }))
@@ -20,13 +20,19 @@ function renderPage() {
   )
 }
 
-/** Saves a game against the computer from `fen` the way the app does, so the page resumes it. */
-function resumeAgainstComputer(fen: string, opponent: Opponent): void {
+/** Saves a game against the computer from `fen` (and `moves`) the way the app does, so the page resumes it. */
+function resumeAgainstComputer(fen: string, opponent: Opponent, moves: readonly string[] = []): void {
   const parsed = parseMeanFen(fen)
   if (!parsed.ok) throw new Error(parsed.error)
-  window.localStorage.setItem('mean-chess:game:v1', exportGame(newGame(parsed.position)))
+  const game = moves.reduce((record, move) => play(record, move), newGame(parsed.position))
+  window.localStorage.setItem('mean-chess:game:v1', exportGame(game))
   window.localStorage.setItem('mean-chess:opponent:v1', JSON.stringify(opponent))
 }
+
+const AUTO_NICE: Opponent = { kind: 'computer', level: 'nice', human: 'white', auto: true }
+/** White to move can take the black king on f3: a quick win against the computer. */
+const ROYAL_WIN = '8/8/8/8/8/5k2/8/7K w - - 0 1'
+const savedSkill = (): unknown => JSON.parse(window.localStorage.getItem('mean-chess:skill:v1') ?? 'null')
 
 /** Waits for the computer's answer, announced for screen readers. */
 const computerMoved = () => screen.findByText(/^The computer played .+\. Your move\.$/, {}, { timeout: 5_000 })
@@ -39,7 +45,7 @@ describe('playing the computer', () => {
     expect(window.location.search).toBe('') // the request is consumed
     const dialog = screen.getByRole('dialog', { name: 'New game' })
     expect(within(dialog).getByRole('radio', { name: /The computer/ })).toHaveProperty('checked', true)
-    await user.click(within(dialog).getByRole('radio', { name: /Nice/ }))
+    await user.click(within(dialog).getByRole('radio', { name: /^Nice/ }))
     await user.click(within(dialog).getByRole('button', { name: 'Start game' }))
     expect(status().getByText('Your move')).toBeTruthy()
     expect(status().getByText(/You play White against the computer/)).toBeTruthy()
@@ -48,6 +54,45 @@ describe('playing the computer', () => {
     await computerMoved()
     expect(moveList().getAllByRole('listitem')).toHaveLength(1)
     expect(moveList().getAllByRole('listitem')[0]?.textContent).toMatch(/^1\.e4\S+$/)
+  })
+
+  it('offers the Auto difficulty to a new player, starting at Nice', async () => {
+    const user = userEvent.setup()
+    window.history.replaceState(null, '', '/play/?new=computer')
+    renderPage()
+    const dialog = screen.getByRole('dialog', { name: 'New game' })
+    const auto = within(dialog).getByRole('radio', { name: /^Auto/ })
+    expect(auto).toHaveProperty('checked', true)
+    expect(auto.closest('label')?.textContent).toMatch(/Nice for now/)
+    await user.click(within(dialog).getByRole('button', { name: 'Start game' }))
+    expect(status().getByText(/against the computer/).textContent).toMatch(/: Nice \(Auto\)$/)
+  })
+
+  it('counts a won game for Auto when the next game starts, and steps up after two wins in a row', async () => {
+    const user = userEvent.setup()
+    window.localStorage.setItem('mean-chess:skill:v1', JSON.stringify({ level: 'nice', streak: 1 }))
+    resumeAgainstComputer(ROYAL_WIN, AUTO_NICE, ['h1f3'])
+    renderPage()
+    const result = screen.getByRole('dialog', { name: 'You win' })
+    expect(within(result).getByText('Auto difficulty: your next game is Mean.')).toBeTruthy()
+    expect(savedSkill()).toEqual({ level: 'nice', streak: 1 }) // not yet: Undo could still take it back
+    await user.click(within(result).getByRole('button', { name: 'Play again' }))
+    expect(status().getByText(/against the computer/).textContent).toMatch(/: Mean \(Auto\)$/)
+    expect(savedSkill()).toEqual({ level: 'mean', streak: 0 })
+  })
+
+  it('does not count a result that Undo took back, or a game abandoned for a new one', async () => {
+    const user = userEvent.setup()
+    window.localStorage.setItem('mean-chess:skill:v1', JSON.stringify({ level: 'nice', streak: 1 }))
+    resumeAgainstComputer(ROYAL_WIN, AUTO_NICE, ['h1f3'])
+    renderPage()
+    await user.click(within(screen.getByRole('dialog', { name: 'You win' })).getByRole('button', { name: 'Undo last move' }))
+    await user.click(button('New game'))
+    const dialog = screen.getByRole('dialog', { name: 'New game' })
+    expect(within(dialog).getByRole('radio', { name: /^Auto/ }).closest('label')?.textContent).toMatch(/Nice for now/)
+    await user.click(within(dialog).getByRole('button', { name: 'Start game' }))
+    expect(status().getByText(/against the computer/).textContent).toMatch(/: Nice \(Auto\)$/)
+    expect(savedSkill()).toEqual({ level: 'nice', streak: 1 })
   })
 
   it('opens as White when the player takes Black, with the board turned around', async () => {

@@ -1,9 +1,11 @@
 import { exportGame, importGame, type GameRecord } from '../engine/index.ts'
+import { NEW_SKILL, isSkill, type Skill } from './autoLevel.ts'
 import { FRIEND, isOpponent, type Opponent } from './opponent.ts'
 
 const GAME_KEY = 'mean-chess:game:v1'
 const PREFERENCES_KEY = 'mean-chess:preferences:v1'
 const OPPONENT_KEY = 'mean-chess:opponent:v1'
+const SKILL_KEY = 'mean-chess:skill:v1'
 
 export interface Preferences {
   readonly flipped: boolean
@@ -69,5 +71,23 @@ export function saveOpponent(opponent: Opponent): void {
     window.localStorage.setItem(OPPONENT_KEY, JSON.stringify(opponent))
   } catch {
     // Ignore: the next visit simply starts a game between friends.
+  }
+}
+
+/** The player's record for the Auto difficulty (D-50). It stays on this device. */
+export function loadSkill(): Skill {
+  try {
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(SKILL_KEY) ?? 'null')
+    return isSkill(parsed) ? parsed : NEW_SKILL
+  } catch {
+    return NEW_SKILL
+  }
+}
+
+export function saveSkill(skill: Skill): void {
+  try {
+    window.localStorage.setItem(SKILL_KEY, JSON.stringify(skill))
+  } catch {
+    // Ignore: Auto simply starts again from Nice next time.
   }
 }

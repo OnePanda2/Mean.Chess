@@ -24,25 +24,38 @@ import { ThemeDialog } from '../components/ThemeDialog.tsx'
 import { PieceStyleContext } from '../components/pieces/pieceStyle.ts'
 import { CapturedPieces, MoveList, StatusPanel } from '../components/SidePanel.tsx'
 import { useAppearance } from './appearance.ts'
+import { recordResult, resultFor, type Skill } from './autoLevel.ts'
 import { useComputer } from './computer.ts'
 import { canUndo, computerToMove, createState, gameReducer, type GameState } from './gameState.ts'
-import { FRIEND, computerColor, type Opponent } from './opponent.ts'
+import { FRIEND, LEVEL_TEXT, computerColor, type Opponent } from './opponent.ts'
 import { findScenario, type Scenario } from './scenarios.ts'
 import {
   loadOpponent,
   loadPreferences,
   loadSavedGame,
+  loadSkill,
   saveGameLocally,
   saveOpponent,
   savePreferences,
+  saveSkill,
 } from './storage.ts'
 import { outcomeDetail, outcomeTitle, sideName } from './text.ts'
 import { themeById } from './themes.ts'
 
 type Dialog = 'none' | 'scenarios' | 'rules' | 'theme' | 'new-game' | 'resign' | 'draw'
 
-/** What the New game dialog suggests for the computer the first time. */
-const DEFAULT_COMPUTER: Opponent = { kind: 'computer', level: 'mean', human: 'white' }
+/** What the New game dialog suggests for the computer the first time: the Auto difficulty (D-50). */
+const DEFAULT_COMPUTER: Opponent = { kind: 'computer', level: 'nice', human: 'white', auto: true }
+
+/**
+ * The Auto record once the current game counts. Only a finished game against the computer counts,
+ * and only when it is replaced by the next one, so Undo can still take a result back (D-50).
+ */
+function settledSkill(skill: Skill, game: GameRecord, opponent: Opponent): Skill {
+  if (opponent.kind !== 'computer') return skill
+  const result = resultFor(game.outcome, opponent.human)
+  return result ? recordResult(skill, opponent.level, result) : skill
+}
 
 /**
  * /play/?new=computer|friend|choose (from the welcome page or the tutorial) opens the New game
@@ -93,10 +106,12 @@ export function PlayApp() {
   const [dismissedOutcome, setDismissedOutcome] = useState<Outcome | null>(null)
   // What the New game dialog preselects: the current opponent, or what the link asked for.
   const [newGameChoice, setNewGameChoice] = useState<Opponent>(requested ?? state.opponent)
+  const [skill, setSkill] = useState(loadSkill)
   const playArea = useRef<HTMLElement>(null)
   const computer = useComputer()
 
   const { game, opponent } = state
+  const settled = useMemo(() => settledSkill(skill, game, opponent), [skill, game, opponent])
   const position = currentPosition(game)
   const analysis = useMemo(() => analyze(position), [position])
   const lastMove = game.moves.at(-1) ?? null
@@ -170,7 +185,15 @@ export function PlayApp() {
     area.querySelector<HTMLButtonElement>('.square[tabindex="0"]')?.focus({ preventScroll: true })
   }
 
+  /** The current game is being replaced: a finished game against the computer now counts for Auto. */
+  function settleSkill(): void {
+    if (settled === skill) return
+    saveSkill(settled)
+    setSkill(settled)
+  }
+
   function load(next: GameRecord, scenario: Scenario | null): void {
+    settleSkill()
     dispatch({ type: 'load', game: next, scenario })
     setDialog('none')
     setHover(null)
@@ -178,7 +201,10 @@ export function PlayApp() {
   }
 
   function start(next: Opponent): void {
-    dispatch({ type: 'start', opponent: next })
+    settleSkill()
+    // An Auto game takes its level from the record, including the game just finished.
+    const chosen = next.kind === 'computer' && next.auto === true ? { ...next, level: settled.level } : next
+    dispatch({ type: 'start', opponent: chosen })
     setDialog('none')
     setHover(null)
     showBoard()
@@ -325,6 +351,7 @@ export function PlayApp() {
       {dialog === 'new-game' && (
         <NewGameDialog
           initial={newGameChoice}
+          autoLevel={settled.level}
           replacing={game.moves.length > 0 && !over}
           onStart={start}
           onClose={() => setDialog('none')}
@@ -362,6 +389,9 @@ export function PlayApp() {
       {showResult && (
         <Modal title={outcomeTitle(game.outcome, opponent)} onClose={() => setDismissedOutcome(game.outcome)}>
           <p>{outcomeDetail(game.outcome, opponent)}</p>
+          {opponent.kind === 'computer' && opponent.auto === true && settled.level !== opponent.level && (
+            <p className="muted">Auto difficulty: your next game is {LEVEL_TEXT[settled.level].name}.</p>
+          )}
           <div className="row">
             <button type="button" className="button button--primary" onClick={() => start(opponent)}>
               Play again

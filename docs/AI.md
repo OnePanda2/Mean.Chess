@@ -98,6 +98,19 @@ development machine, with short time limits:
 - Ruthless beat Mean 3 of 4.
 - Mean beat Nice 4 of 4, including a Royal Capture and a cannibalism escape.
 
+### Auto (D-50)
+
+**Auto** isn't a fourth strength. It picks one of the three for each game, from the player's results
+on this device (`src/app/autoLevel.ts`, stored as `mean-chess:skill:v1`):
+- It starts at Nice.
+- Two wins in a row at the current level or above move it up; two losses in a row at the current
+  level or below move it down; a draw resets the count.
+- A finished game counts only when the next game starts (or a position is loaded), so Undo can still
+  take a result back. A game abandoned for a new one never counts, and neither do tutorial games.
+
+Auto is the default in the New game dialog for anyone who hasn't chosen a level. The result dialog
+says when the next Auto game changes level.
+
 ## In the app
 
 - `src/app/computer.ts` is the client. It sends `{ start, moves, level, seed }` to the worker and

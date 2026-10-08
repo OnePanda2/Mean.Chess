@@ -32,9 +32,10 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
 ## Features
 
 - A rules engine that is complete and heavily tested (see *Testing* below).
-- A computer opponent at three levels: **Nice**, **Mean** and **Ruthless**. It thinks in a Web
-  Worker, so the page never freezes, and it will take your king the moment you step into its Kill
-  Zone.
+- A computer opponent at three levels: **Nice**, **Mean** and **Ruthless**, plus **Auto**, which
+  picks the level from your results (two wins in a row move it up, two losses move it down). It
+  thinks in a Web Worker, so the page never freezes, and it will take your king the moment you step
+  into its Kill Zone.
 - Move hints for normal moves, captures and sacrifices, with special moves explained. Deliberately,
   nothing reveals the Kill Zone or points out a winning royal move: spotting them is the game.
 - A welcome page with two doors: a **tutorial** that teaches Mean Chess in 8 short lessons on a real

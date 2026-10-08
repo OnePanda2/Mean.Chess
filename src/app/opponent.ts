@@ -1,10 +1,13 @@
 import { isLevel, type Level } from '../ai/levels.ts'
 import type { Color } from '../engine/index.ts'
 
-/** Who the player faces: a friend on the same device, or the computer (docs/AI.md). */
+/**
+ * Who the player faces: a friend on the same device, or the computer (docs/AI.md). With `auto`, the
+ * level was picked from the player's results (D-50) when the game started.
+ */
 export type Opponent =
   | { readonly kind: 'friend' }
-  | { readonly kind: 'computer'; readonly level: Level; readonly human: Color }
+  | { readonly kind: 'computer'; readonly level: Level; readonly human: Color; readonly auto?: boolean }
 
 export const FRIEND: Opponent = { kind: 'friend' }
 
@@ -23,5 +26,10 @@ export function isOpponent(value: unknown): value is Opponent {
   if (typeof value !== 'object' || value === null) return false
   const record = value as Record<string, unknown>
   if (record.kind === 'friend') return true
-  return record.kind === 'computer' && isLevel(record.level) && (record.human === 'white' || record.human === 'black')
+  return (
+    record.kind === 'computer' &&
+    isLevel(record.level) &&
+    (record.human === 'white' || record.human === 'black') &&
+    (record.auto === undefined || typeof record.auto === 'boolean')
+  )
 }

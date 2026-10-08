@@ -57,6 +57,7 @@ export function StatusPanel({
       {opponent.kind === 'computer' && (
         <p className="matchup">
           You play {sideName(opponent.human)} against the computer: <strong>{LEVEL_TEXT[opponent.level].name}</strong>
+          {opponent.auto === true && ' (Auto)'}
         </p>
       )}
       {game.outcome && (

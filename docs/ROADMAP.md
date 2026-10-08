@@ -23,11 +23,11 @@ Picnic), move and capture animations, the rules page, and deployment to GitHub P
 **v0.2.1** tags what shipped after v0.2.0: the welcome page and interactive tutorial (D-48), and
 no more pointing out winning royal moves (D-46).
 
-## v0.2.2 (next): automatic difficulty
+## v0.2.2 (released): automatic difficulty
 
 - An **Auto** level for the computer. It picks Nice, Mean or Ruthless from the player's results on
   this device, starting at Nice: two wins in a row step up, two losses in a row step down
-  (decision P2-33).
+  (decisions D-50 and P2-33).
 
 ## v0.3: play a friend online
 

@@ -783,13 +783,13 @@ The founder answered F1–F12 on 8 October 2026:
 **Phase 0**
 - [x] Founder reads this blueprint and answers F1–F12 (8 October 2026)
 - [x] Founder answers F13–F14 (the computer fallback, Auto difficulty) (9 October 2026)
-- [ ] Claude commits the Phase 2 docs (docs only) and updates the handover
-- [ ] Tag `v0.2.1` (if F8 approved)
+- [x] Claude commits the Phase 2 docs (docs only) and updates the handover (9 October 2026)
+- [x] Tag `v0.2.1` (9 October 2026)
 - [ ] Founder: Cloudflare account, 2FA, subdomain, API token, GitHub secret and variable, `wrangler login` (F-A1 to F-A6)
 - [ ] Claude: A0 spike and report; amend any decisions it disproves
 
 **Phase 1**
-- [ ] V7 Auto difficulty, released as v0.2.2 (F14 approved)
+- [x] V7 Auto difficulty, released as v0.2.2 (9 October 2026; D-50)
 - [ ] A1 protocol · [ ] A2 RoomCore and restore property tests · [ ] A3 Worker and adapter with integration and failure tests
 - [ ] B1 press kit, `og.png`, meta tags (deployed with approval) · [ ] F-A8 Web Analytics, snippet added · [ ] F-B1 GitHub settings
 - [ ] Founder starts participating in r/chessvariants
