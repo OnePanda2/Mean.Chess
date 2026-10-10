@@ -76,9 +76,37 @@ describe('the play page', () => {
     expect(document.querySelectorAll('.board__hints .hint--ring')).toHaveLength(1)
     expect(document.querySelectorAll('.board__hints .hint--win')).toHaveLength(0)
     await user.click(square('f3'))
-    const dialog = screen.getByRole('dialog', { name: 'White wins' })
+    // The capture plays out first: no result box yet, and the badges wait their turn (D-52).
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(document.querySelectorAll('.status-card .banner--result')).toHaveLength(0)
+    expect(document.querySelectorAll('.end-badge--crown')).toHaveLength(1)
+    expect(document.querySelectorAll('.end-badge--skull')).toHaveLength(1)
+    // The gold glow sits on the winner's square; the glow itself carries no position, so its
+    // pulsing can't knock it off the square.
+    const glowCell = document.querySelector<HTMLElement>('.board__glow-cell')
+    const crownCell = document.querySelector('.end-badge--crown')?.parentElement
+    expect(glowCell?.style.transform).toBe(crownCell?.style.transform)
+    expect(glowCell?.querySelector<HTMLElement>('.board__glow')?.style.transform).toBe('')
+    const dialog = await screen.findByRole('dialog', { name: 'White wins' }, { timeout: 6_000 })
     expect(within(dialog).getByText(/Royal Capture/)).toBeTruthy()
     expect(moveList().getByText('K×K')).toBeTruthy()
+    expect(document.querySelectorAll('.status-card .banner--result')).toHaveLength(1)
+  })
+
+  it('slices the sacrificed piece before the king strikes in a Royal Slaughter (D-52)', async () => {
+    window.history.replaceState(null, '', '/?scenario=slaughter-pawn')
+    const user = userEvent.setup()
+    const { container } = render(<PlayApp />)
+    await user.click(square('e1'))
+    await user.click(square('e3'))
+    const sliced = container.querySelector('.board__ghost--sliced')
+    expect(sliced?.querySelectorAll('.slice__half')).toHaveLength(2)
+    expect(sliced?.querySelectorAll('.slice__stream').length).toBeGreaterThan(0)
+    expect(container.querySelector('.board__piece--after-slice')).not.toBeNull()
+    expect(container.querySelector('.board__ghost--royal.board__ghost--after-slice')).not.toBeNull()
+    expect(container.querySelector('.board__flash--after-slice')).not.toBeNull()
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(moveList().getByText('K×P×K')).toBeTruthy()
   })
 
   it('never reveals the Kill Zone: no threat alert, no "Doomed", no overlay button (D-39)', () => {
@@ -156,7 +184,9 @@ describe('the play page', () => {
     render(<PlayApp />)
     await user.click(screen.getByRole('button', { name: 'Resign' }))
     await user.click(within(screen.getByRole('dialog', { name: 'Resign as White?' })).getByRole('button', { name: 'Resign' }))
-    expect(screen.getByRole('dialog', { name: 'Black wins' })).toBeTruthy()
+    expect(document.querySelectorAll('.end-badge--flag')).toHaveLength(1)
+    expect(document.querySelectorAll('.end-badge--crown')).toHaveLength(1)
+    expect(await screen.findByRole('dialog', { name: 'Black wins' }, { timeout: 4_000 })).toBeTruthy()
     await user.click(screen.getByRole('button', { name: 'View the board' }))
     await user.click(screen.getByRole('button', { name: 'Undo' }))
     expect(status().getByText('White to move')).toBeTruthy()

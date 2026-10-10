@@ -29,6 +29,15 @@ no more pointing out winning royal moves (D-46).
   this device, starting at Nice: two wins in a row step up, two losses in a row step down
   (decisions D-50 and P2-33).
 
+## v0.2.3 (released): the Warlord king, and how a game ends
+
+- A new king, the Warlord, in all four themes: the cross on a spiked war crown and a heavy visored helm.
+  It is bigger and meaner than the queen (D-51).
+- The final move plays out before the result appears. Then badges land on the kings, Chess.com style:
+  crown, skull, flag or ½. The result box opens a moment later (D-52).
+- A Royal Slaughter slices the sacrificed piece in half, with blood, before the king strikes (D-52).
+- Fixed: a piece moving to a later square jumped instead of sliding.
+
 ## v0.3: play a friend online
 
 - Invite a friend with a link. Every move is checked by the same engine, running in one Cloudflare

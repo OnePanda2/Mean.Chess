@@ -6,21 +6,22 @@ import type { PieceType } from '../../engine/index.ts'
  * Colours come from the same CSS custom properties as the vector set (styles/pieces.css).
  */
 export const PIXEL_SPRITES: Readonly<Record<PieceType, readonly string[]>> = {
+  // The Warlord (D-51): cross, crown, great helm with a red T-visor, broad shoulders.
   king: [
     '......oooo......',
     '......offo......',
     '....oooffooo....',
     '....offffffo....',
     '....oooffooo....',
-    '......offo......',
-    '...ooooffoooo...',
+    '..oo..offo..oo..',
+    '..ofoooffooofo..',
     '..offffffffffo..',
-    '..offhffffhffo..',
+    '..ofaaaaaaaafo..',
     '..offffaaffffo..',
-    '...offffffffo...',
-    '...oooooooooo...',
-    '....offffffo....',
-    '...offffffffo...',
+    '...offfaafffo...',
+    'oooooooooooooooo',
+    'offhffffffffhffo',
+    '.oooffffffffooo.',
     '..oooooooooooo..',
     '................',
   ],

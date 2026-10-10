@@ -13,7 +13,7 @@ import {
   type Outcome,
   type Square,
 } from '../engine/index.ts'
-import { Board } from '../components/Board.tsx'
+import { Board, type BoardEnding } from '../components/Board.tsx'
 import { Footer, TopBar } from '../components/Chrome.tsx'
 import { Modal } from '../components/Modal.tsx'
 import { PromotionDialog } from '../components/PromotionDialog.tsx'
@@ -26,6 +26,7 @@ import { CapturedPieces, MoveList, StatusPanel } from '../components/SidePanel.t
 import { useAppearance } from './appearance.ts'
 import { recordResult, resultFor, type Skill } from './autoLevel.ts'
 import { useComputer } from './computer.ts'
+import { endingBadges, endingTimeline } from './ending.ts'
 import { canUndo, computerToMove, createState, gameReducer, type GameState } from './gameState.ts'
 import { FRIEND, LEVEL_TEXT, computerColor, type Opponent } from './opponent.ts'
 import { findScenario, type Scenario } from './scenarios.ts'
@@ -107,11 +108,26 @@ export function PlayApp() {
   // What the New game dialog preselects: the current opponent, or what the link asked for.
   const [newGameChoice, setNewGameChoice] = useState<Opponent>(requested ?? state.opponent)
   const [skill, setSkill] = useState(loadSkill)
+  // A game that was already over when the page opened has no final move to watch (D-52).
+  const [reopenedOutcome] = useState(() => state.game.outcome)
+  // How far the ending has got: badges on the kings, then the result box (D-52).
+  const [endingStage, setEndingStage] = useState<{ readonly outcome: Outcome; readonly stage: 'badges' | 'result' } | null>(
+    null,
+  )
   const playArea = useRef<HTMLElement>(null)
   const computer = useComputer()
 
   const { game, opponent } = state
   const settled = useMemo(() => settledSkill(skill, game, opponent), [skill, game, opponent])
+  const motionOn = appearance.animations && !prefersReducedMotion()
+  const lastPlayed = game.moves.at(-1) ?? null
+  const timeline = useMemo(
+    () =>
+      game.outcome
+        ? endingTimeline(game.outcome, lastPlayed, { animate: motionOn, live: game.outcome !== reopenedOutcome })
+        : null,
+    [game.outcome, lastPlayed, motionOn, reopenedOutcome],
+  )
   const position = currentPosition(game)
   const analysis = useMemo(() => analyze(position), [position])
   const lastMove = game.moves.at(-1) ?? null
@@ -125,6 +141,18 @@ export function PlayApp() {
   useEffect(() => {
     saveGameLocally(game)
   }, [game])
+  // The final move plays out, then the badges, then the result box (D-52).
+  useEffect(() => {
+    const outcome = game.outcome
+    if (!outcome || !timeline) return
+    const timers = [
+      setTimeout(() => setEndingStage({ outcome, stage: 'badges' }), timeline.badgesAt),
+      setTimeout(() => setEndingStage({ outcome, stage: 'result' }), timeline.resultAt),
+    ]
+    return () => {
+      timers.forEach(clearTimeout)
+    }
+  }, [game.outcome, timeline])
   useEffect(() => {
     savePreferences({ flipped: state.flipped })
   }, [state.flipped])
@@ -234,7 +262,17 @@ export function PlayApp() {
       })
   }
 
-  const showResult = game.outcome !== null && game.outcome !== dismissedOutcome && dialog === 'none'
+  const reached = game.outcome !== null && endingStage?.outcome === game.outcome ? endingStage.stage : null
+  const showResult =
+    game.outcome !== null && reached === 'result' && game.outcome !== dismissedOutcome && dialog === 'none'
+  const ending: BoardEnding | null =
+    game.outcome && timeline
+      ? {
+          key: `${game.moves.length}-${game.outcome.kind}`,
+          badges: endingBadges(game.outcome, position, lastPlayed),
+          delayMs: timeline.badgesAt,
+        }
+      : null
   const lastNotation = state.notation.at(-1) ?? ''
   const announcement = game.outcome
     ? `${outcomeTitle(game.outcome, opponent)}.`
@@ -267,6 +305,7 @@ export function PlayApp() {
               interactive={!over && !thinking}
               transition={state.transition}
               animate={appearance.animations}
+              ending={ending}
               onSquare={(square) => {
                 dispatch({ type: 'square', square })
               }}
@@ -291,6 +330,7 @@ export function PlayApp() {
               opponent={opponent}
               thinking={thinking}
               notice={notice}
+              resultShown={reached !== null}
             />
             <div className="card controls" role="group" aria-label="Game controls">
               <button type="button" className="button" onClick={() => openNewGame(opponent)}>

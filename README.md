@@ -43,9 +43,11 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
 - Scenario Lab: curated positions for every rule, plus importing and sharing positions (MeanFEN) and
   whole games.
 - Original piece artwork in four themes: **Mean**, **Sugar** (pink), **Arcade** (8-bit, pixel
-  pieces) and **Picnic** (gingham).
-- Animated moves, captures, Royal Capture and Royal Cannibalism. This can be switched off, and
-  reduced-motion settings are respected.
+  pieces) and **Picnic** (gingham), led by a ruthless Warlord king.
+- Animated moves, captures, Royal Capture and Royal Cannibalism. A Royal Slaughter slices the
+  sacrificed piece in half before the king strikes. When a game ends, the final move plays out, badges
+  land on the kings (crown, skull, flag or ½), and only then does the result appear. Animation can be
+  switched off, and reduced-motion settings are respected.
 - Undo, board flip, draw, resign, autosave, keyboard navigation, screen-reader labels, and layouts
   for phones and desktops.
 

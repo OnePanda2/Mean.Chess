@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useRef, useState, type CSSProperties, type KeyboardEvent, type ReactElement } from 'react'
 import {
   explainMove,
   fileOf,
@@ -14,8 +14,9 @@ import {
   type PositionAnalysis,
   type Square,
 } from '../engine/index.ts'
+import { SLICE_MS, type Badge, type BadgeKind } from '../app/ending.ts'
 import type { Transition } from '../app/gameState.ts'
-import { SacrificeIcon } from './Icons.tsx'
+import { CrownIcon, FlagIcon, HalfIcon, SacrificeIcon, SkullIcon } from './Icons.tsx'
 import { PieceImage } from './PieceImage.tsx'
 
 /**
@@ -57,7 +58,7 @@ const VISUAL_ORDER = Array.from({ length: 64 }, (_, index) => index)
 interface Ghost {
   readonly piece: Piece
   readonly sq: Square
-  readonly variant: 'taken' | 'eaten' | 'royal'
+  readonly variant: 'taken' | 'eaten' | 'royal' | 'sliced'
 }
 
 /** What to animate for this transition: ghosts, pieces that reappear, a promotion, a flash. */
@@ -66,6 +67,8 @@ function motionFor(transition: Transition, board: readonly (Piece | null)[]) {
   const appear = new Set<string>()
   let promoted: string | null = null
   let flash: 'royal' | 'sacrifice' | null = null
+  // A Royal Slaughter slices the king's own piece first; the king strikes once it has gone (D-52).
+  let slaughterer: string | null = null
   const { move } = transition
   if (transition.kind === 'move' && move) {
     const royal = move.kind === 'royal-capture' || move.kind === 'royal-slaughter'
@@ -74,8 +77,10 @@ function motionFor(transition: Transition, board: readonly (Piece | null)[]) {
       ghosts.push({ piece: move.captured, sq, variant: royal ? 'royal' : 'taken' })
     }
     if (move.sacrificed && move.sacrificeSquare !== undefined) {
-      ghosts.push({ piece: move.sacrificed, sq: move.sacrificeSquare, variant: 'eaten' })
+      const variant = move.kind === 'royal-slaughter' ? 'sliced' : 'eaten'
+      ghosts.push({ piece: move.sacrificed, sq: move.sacrificeSquare, variant })
     }
+    if (move.kind === 'royal-slaughter') slaughterer = move.piece.id
     if (move.promotion) promoted = move.piece.id
     flash = royal ? 'royal' : move.kind === 'self-capture' ? 'sacrifice' : null
   } else if (transition.from) {
@@ -83,7 +88,81 @@ function motionFor(transition: Transition, board: readonly (Piece | null)[]) {
     const before = new Set(transition.from.board.flatMap((piece) => (piece ? [piece.id] : [])))
     for (const piece of board) if (piece && !before.has(piece.id)) appear.add(piece.id)
   }
-  return { ghosts, appear, promoted, flash }
+  return { ghosts, appear, promoted, flash, slaughterer }
+}
+
+/**
+ * Blood from the cut (viewBox units). The slash runs from (104,18) to (-4,72), so y = 72 - 0.54x; the
+ * drips start where it crosses the middle of a piece, and run down its body.
+ */
+const DRIPS = [
+  { x: 37, y: 52, length: 24, delay: 170 },
+  { x: 45, y: 47.7, length: 33, delay: 230 },
+  { x: 54, y: 42.8, length: 27, delay: 190 },
+  { x: 62, y: 38.5, length: 19, delay: 280 },
+] as const
+const SPLATTER = [
+  { cx: 46, cy: 47, r: 2.6, dx: -18, dy: -15 },
+  { cx: 55, cy: 42, r: 2.2, dx: 16, dy: -19 },
+  { cx: 40, cy: 50, r: 1.8, dx: -22, dy: 6 },
+  { cx: 60, cy: 39, r: 1.7, dx: 22, dy: 3 },
+  { cx: 50, cy: 45, r: 1.4, dx: 5, dy: -24 },
+] as const
+
+/** Royal Slaughter (D-52): the king's own piece is cut in half, bleeds, and fades before the king strikes. */
+function SlicedPiece({ piece }: { readonly piece: Piece }) {
+  return (
+    <div className="slice">
+      <div className="slice__half slice__half--upper">
+        <PieceImage piece={piece} />
+      </div>
+      <div className="slice__half slice__half--lower">
+        <PieceImage piece={piece} />
+      </div>
+      <svg className="slice__fx" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <g className="slice__blood">
+          <ellipse className="slice__pool" cx="48" cy="88" rx="28" ry="5" />
+          {DRIPS.map((drip) => (
+            <g
+              key={drip.x}
+              className="slice__drip"
+              style={{ '--drip-delay': `${drip.delay}ms`, '--bead-rise': `-${drip.length}px` } as CSSProperties}
+            >
+              <rect className="slice__stream" x={drip.x - 2.3} y={drip.y} width="4.6" height={drip.length} rx="2.3" />
+              <circle className="slice__bead" cx={drip.x} cy={drip.y + drip.length - 1.5} r="3.3" />
+            </g>
+          ))}
+          {SPLATTER.map((drop) => (
+            <circle
+              key={`${drop.cx}-${drop.cy}`}
+              className="slice__spray"
+              cx={drop.cx}
+              cy={drop.cy}
+              r={drop.r}
+              style={{ '--dx': `${drop.dx}px`, '--dy': `${drop.dy}px` } as CSSProperties}
+            />
+          ))}
+        </g>
+        <line className="slice__blade" x1="104" y1="18" x2="-4" y2="72" pathLength={1} />
+      </svg>
+    </div>
+  )
+}
+
+const BADGE_ICONS: Readonly<Record<BadgeKind, () => ReactElement>> = {
+  crown: CrownIcon,
+  skull: SkullIcon,
+  flag: FlagIcon,
+  draw: HalfIcon,
+}
+
+/** How a finished game is marked on the board (D-52): badges on the kings, after the final move. */
+export interface BoardEnding {
+  /** Changes with each new ending, so its animations play once. */
+  readonly key: string
+  readonly badges: readonly Badge[]
+  /** When the badges appear, in milliseconds (they wait for the final move's animation). */
+  readonly delayMs: number
 }
 
 export interface BoardProps {
@@ -102,6 +181,8 @@ export interface BoardProps {
   readonly onDeselect?: () => void
   /** Called with the explanation of the hovered or focused target, or null. */
   readonly onHint?: (explanation: Explanation | null) => void
+  /** A finished game's badges (play page only). */
+  readonly ending?: BoardEnding | null
 }
 
 export function Board({
@@ -116,6 +197,7 @@ export function Board({
   onSquare,
   onDeselect,
   onHint,
+  ending = null,
 }: BoardProps) {
   const { board, sideToMove } = position
   const buttons = useRef<(HTMLButtonElement | null)[]>([])
@@ -133,6 +215,9 @@ export function Board({
   board.forEach((piece, sq) => {
     if (piece) pieces.push({ piece, sq })
   })
+  // Rendered in a fixed order (by identity, not by square), so React never has to move a piece's
+  // element when the piece moves: moving an element cancels its CSS slide, and the piece would jump.
+  pieces.sort((a, b) => (a.piece.id < b.piece.id ? -1 : a.piece.id > b.piece.id ? 1 : 0))
   const motion = motionFor(transition, board)
   const translate = (sq: Square): string => {
     const { col, row } = placeOf(sq, flipped)
@@ -161,6 +246,7 @@ export function Board({
   return (
     <div
       className={`board${interactive ? '' : ' board--inactive'}${animate ? '' : ' board--still'}`}
+      style={{ '--slice-duration': `${SLICE_MS}ms` } as CSSProperties}
       onKeyDown={moveFocus}
     >
       <div className="board__squares" role="group" aria-label="Mean Chess board">
@@ -214,15 +300,32 @@ export function Board({
       </div>
 
       <div className="board__pieces" aria-hidden="true">
+        {ending?.badges
+          .filter((badge) => badge.kind === 'crown')
+          .map((badge) => (
+            <div key={`glow-${ending.key}`} className="board__glow-cell" style={{ transform: translate(badge.sq) }}>
+              <div className="board__glow" style={{ '--badge-delay': `${ending.delayMs}ms` } as CSSProperties} />
+            </div>
+          ))}
         {motion.ghosts.map((ghost) => (
           <div
             key={`ghost-${transition.id}-${ghost.piece.id}`}
-            className={`board__ghost board__ghost--${ghost.variant}`}
+            className={[
+              'board__ghost',
+              `board__ghost--${ghost.variant}`,
+              motion.slaughterer && ghost.variant === 'royal' ? 'board__ghost--after-slice' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             style={{ transform: translate(ghost.sq) }}
           >
-            <div className="board__art">
-              <PieceImage piece={ghost.piece} />
-            </div>
+            {ghost.variant === 'sliced' ? (
+              <SlicedPiece piece={ghost.piece} />
+            ) : (
+              <div className="board__art">
+                <PieceImage piece={ghost.piece} />
+              </div>
+            )}
           </div>
         ))}
         {pieces.map(({ piece, sq }) => {
@@ -230,6 +333,7 @@ export function Board({
             'board__piece',
             motion.appear.has(piece.id) ? 'board__piece--appear' : '',
             motion.promoted === piece.id ? 'board__piece--promoted' : '',
+            motion.slaughterer === piece.id ? 'board__piece--after-slice' : '',
           ]
           return (
             <div key={piece.id} className={classes.filter(Boolean).join(' ')} style={{ transform: translate(sq) }}>
@@ -260,8 +364,34 @@ export function Board({
         })}
       </div>
 
+      {ending && ending.badges.length > 0 && (
+        <div className="board__badges" aria-hidden="true">
+          {ending.badges.map((badge) => {
+            const Icon = BADGE_ICONS[badge.kind]
+            return (
+              <div
+                key={`${ending.key}-${badge.kind}-${badge.sq}`}
+                className="board__badge-cell"
+                style={{ transform: translate(badge.sq) }}
+              >
+                <span
+                  className={`end-badge end-badge--${badge.kind} end-badge--${badge.corner}`}
+                  style={{ '--badge-delay': `${ending.delayMs}ms` } as CSSProperties}
+                >
+                  <Icon />
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       {motion.flash && (
-        <div key={`flash-${transition.id}`} className={`board__flash board__flash--${motion.flash}`} aria-hidden="true" />
+        <div
+          key={`flash-${transition.id}`}
+          className={`board__flash board__flash--${motion.flash}${motion.slaughterer ? ' board__flash--after-slice' : ''}`}
+          aria-hidden="true"
+        />
       )}
     </div>
   )

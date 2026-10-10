@@ -48,6 +48,17 @@ describe('themes', () => {
 })
 
 describe('move and capture animation', () => {
+  it('keeps every piece’s element in place when a piece moves, so its slide is never cut short', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<PlayApp />)
+    const before = [...container.querySelectorAll('.board__piece')]
+    // e2-e3 passes f2, g2 and h2 in board order. Moving the pawn's element in the DOM would cancel
+    // its slide (and a Royal Slaughter's king would vanish instead of waiting for the slice).
+    for (const name of ['e2', 'e3']) await user.click(square(name))
+    const after = [...container.querySelectorAll('.board__piece')]
+    expect(after.map((element) => before.indexOf(element))).toEqual(before.map((_, index) => index))
+  })
+
   it('leaves a ghost of a captured piece, and brings it back on undo', async () => {
     const user = userEvent.setup()
     const { container } = render(<PlayApp />)

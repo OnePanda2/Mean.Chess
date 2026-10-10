@@ -20,6 +20,7 @@ export function StatusPanel({
   opponent,
   thinking,
   notice,
+  resultShown = true,
 }: {
   readonly game: GameRecord
   readonly analysis: PositionAnalysis
@@ -28,6 +29,8 @@ export function StatusPanel({
   readonly opponent: Opponent
   /** The computer is choosing its move. */
   readonly thinking: boolean
+  /** The result banner waits until the final move has played out (D-52). */
+  readonly resultShown?: boolean
   /** A short message from the computer, such as a declined draw offer. */
   readonly notice: string | null
 }) {
@@ -60,7 +63,7 @@ export function StatusPanel({
           {opponent.auto === true && ' (Auto)'}
         </p>
       )}
-      {game.outcome && (
+      {game.outcome && resultShown && (
         <div className="banner banner--result">
           <strong>{outcomeTitle(game.outcome, opponent)}</strong>
           <span>{outcomeDetail(game.outcome, opponent)}</span>

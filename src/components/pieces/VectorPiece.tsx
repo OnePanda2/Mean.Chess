@@ -13,18 +13,20 @@ import type { PieceType } from '../../engine/index.ts'
  */
 
 const PLINTH = 'M19 91 H81 L77 81 H23 Z'
-/** The flared skirt shared by the king and queen. */
+/** The queen's flared skirt. */
 const ROYAL_SKIRT = 'M35 59 H65 C64 68 69 76 74 81 H26 C31 76 36 68 35 59 Z'
 
 const DRAWINGS: Readonly<Record<PieceType, ReactNode>> = {
+  // The Warlord (D-51, founder's pick of three sketches): a crowned great helm with a red T-visor and
+  // armoured shoulders, under the cross. Wider and taller than the queen; no bishop-like dome.
   king: (
     <>
-      <path className="pa-body" d="M46 3 H54 V10 H61 V17 H54 V25 H46 V17 H39 V10 H46 Z" />
-      <path className="pa-body" d="M31 51 C29 36 38 25 50 25 C62 25 71 36 69 51 Z" />
-      <path className="pa-line" d="M50 31 V51 M39 42 L50 31 L61 42" />
-      <path className="pa-body" d="M29 51 H71 L68 59 H32 Z" />
-      <path className="pa-body" d={ROYAL_SKIRT} />
-      <path className="pa-accent" d="M47 55 L50 52 L53 55 L50 58 Z" />
+      <path className="pa-body" d="M46 1 H54 V8 H62 V15 H54 V27 H46 V15 H38 V8 H46 Z" />
+      <path className="pa-body" d="M24 36 L27 23 L34 30 L41 21 L47 29 L50 25 L53 29 L59 21 L66 30 L73 23 L76 36 Z" />
+      <path className="pa-body" d="M23 35 H77 L75 55 L64 61 H36 L25 55 Z" />
+      <path className="pa-accent" d="M32 43 H68 V47.5 H53 V57 H47 V47.5 H32 Z" />
+      <path className="pa-body" d="M15 61 L30 57 H70 L85 61 L79 67 H21 Z" />
+      <path className="pa-body" d="M30 67 H70 C70 72 74 77 79 81 H21 C26 77 30 72 30 67 Z" />
     </>
   ),
   queen: (
