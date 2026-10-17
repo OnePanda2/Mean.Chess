@@ -8,6 +8,10 @@ and sometimes a king has to sacrifice his own pieces to survive.
 **Play it at https://meanchess.siddheshthapa.com.** Play the computer at three levels, or a friend
 on the same device. There's nothing to install and no account.
 
+<p align="center">
+  <img src="public/press/royal-slaughter.gif" width="420" alt="A Royal Slaughter: in check, the white king slices its own pawn in half and captures the black king behind it." />
+</p>
+
 ## The rules in one minute
 
 Everything in standard chess applies, plus:
@@ -50,6 +54,11 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
   switched off, and reduced-motion settings are respected.
 - Undo, board flip, draw, resign, autosave, keyboard navigation, screen-reader labels, and layouts
   for phones and desktops.
+
+## Press kit
+
+Descriptions, screenshots, clips, an example game and link-ready images are in
+[docs/PRESS-KIT.md](docs/PRESS-KIT.md).
 
 ## Running it locally
 

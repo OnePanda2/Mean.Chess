@@ -307,7 +307,7 @@ Tier 1 needs the founder because posts must come from a real person's account, i
 
 ## 10. The press kit
 
-Texts live in `docs/PRESS-KIT.md` (to be created, B1). Images go in `public/press/`, served at
+Texts live in [PRESS-KIT.md](PRESS-KIT.md) (built 17 October 2026, B1). Images go in `public/press/`, served at
 `https://meanchess.siddheshthapa.com/press/…` so every venue links to the same files. Claude drafts
 the descriptive texts below (site copy, not community posts); the founder approves them.
 
@@ -318,7 +318,7 @@ the descriptive texts below (site copy, not community posts); the founder approv
 | 3 | Rules summary (about 150 words) | The rules row of §5, condensed, ending with a link to `/rules/` |
 | 4 | What makes it different | (a) Only kings can capture kings, from two squares away: Royal Capture. (b) A king can eat its own piece standing between the kings to do it: Royal Slaughter. (c) A trapped king can eat its own neighbour to escape check: Royal Cannibalism. (d) A strict sacrifice order: pawns, then knights and bishops, then rooks, then promoted queens. (e) The original queen is untouchable; promoted queens are not. (f) An enemy piece between the kings blocks everything, so every piece between them is its owner's shield and weapon. |
 | 5 | Screenshots | `screenshot-mean.png` (1600×1000, mid-game, Mean theme); `screenshot-themes.png` (the four themes side by side) |
-| 6 | Short clips | `royal-slaughter.gif` and `.mp4` (about 6 s); `cannibalism.gif` and `.mp4` (about 6 s). Captured with Playwright's video recording from the Scenario Lab links. Converting to GIF needs ffmpeg (founder approval to install), or the founder records with Windows Game Bar (Win+G). |
+| 6 | Short clips | `royal-slaughter.gif` and `.mp4` (about 6 s); `cannibalism.gif` and `.mp4` (about 6 s). Built with local tooling instead (no new installs): frames captured on a virtual clock in headless Chrome, encoded to MP4 by Chrome itself, and made into GIFs with Python. Plus a vertical 1080×1920 clip for short-video sites, kept out of the site. |
 | 7 | Live link | https://meanchess.siddheshthapa.com |
 | 8 | Rules | https://meanchess.siddheshthapa.com/rules/ |
 | 9 | Tutorial | https://meanchess.siddheshthapa.com/tutorial/ |
@@ -431,7 +431,7 @@ it.
 | Step | Who | What | Depends on |
 |---|---|---|---|
 | B0 | Founder | Approve the blueprint, incl. F6a (Web Analytics), F7 (contact), F12 (name). **Done 8 October 2026.** | — |
-| B1 | Claude | Press kit (`docs/PRESS-KIT.md`, `public/press/`), `og.png` and meta tags on all pages, diagrams, clips, example game, Chess Variant Pages page draft | B0 |
+| B1 | Claude | Press kit (`docs/PRESS-KIT.md`, `public/press/`), `og.png` and meta tags on all pages, diagrams, clips, example game, Chess Variant Pages page draft ([CHESS-VARIANT-PAGES.md](CHESS-VARIANT-PAGES.md)). **Built 17 October 2026.** | B0 |
 | B2 | Founder, then Claude | Web Analytics (F-A8), then Claude adds the snippet; GitHub settings (F-B1) | B0, B1 |
 | B3 | Founder | Join r/chessvariants and participate for 1–2 weeks | B0 |
 | B4 | Founder | Chess Variant Pages: check weekly; register and submit when it's reachable (F-B3) | B1 |
