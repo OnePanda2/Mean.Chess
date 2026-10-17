@@ -38,7 +38,7 @@ The full specification is [docs/RULES.md](docs/RULES.md), and the site has an il
   into its Kill Zone.
 - Move hints for normal moves, captures and sacrifices, with special moves explained. Deliberately,
   nothing reveals the Kill Zone or points out a winning royal move: spotting them is the game.
-- A welcome page with two doors: a **tutorial** that teaches Mean Chess in 8 short lessons on a real
+- A welcome page with two doors: a **tutorial** that teaches Mean Chess in 16 short lessons on a real
   board (and points newcomers to free guides for regular chess first), or straight to a game.
 - Scenario Lab: curated positions for every rule, plus importing and sharing positions (MeanFEN) and
   whole games.

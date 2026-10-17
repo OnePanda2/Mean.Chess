@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { WelcomeApp } from '../../src/app/WelcomeApp.tsx'
+import { LESSONS } from '../../src/app/lessons.ts'
 import { exportGame, newGame, play } from '../../src/engine/index.ts'
 
 const choices = () => within(screen.getByRole('navigation', { name: 'Get started' }))
@@ -11,7 +12,7 @@ describe('the welcome page', () => {
     render(<WelcomeApp />)
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Mean Chess')
     expect(card(/^Start here.*Tutorial/).getAttribute('href')).toBe('/tutorial/')
-    expect(card(/Learn how to play/).textContent).toContain('8 short lessons')
+    expect(card(/Learn how to play/).textContent).toContain(`${LESSONS.length} short lessons`)
     expect(card(/^Play/).getAttribute('href')).toBe('/play/?new=choose')
     expect(screen.getByRole('link', { name: 'Read the full rules →' }).getAttribute('href')).toBe('/rules/')
   })
@@ -26,7 +27,7 @@ describe('the welcome page', () => {
   it('shows where the player is in the tutorial', () => {
     window.localStorage.setItem('mean-chess:tutorial:v1', JSON.stringify({ lesson: 3, finished: false }))
     const { unmount } = render(<WelcomeApp />)
-    expect(card(/Tutorial/).textContent).toContain('Continue at lesson 4 of 8')
+    expect(card(/Tutorial/).textContent).toContain(`Continue at lesson 4 of ${LESSONS.length}`)
     unmount()
     window.localStorage.setItem('mean-chess:tutorial:v1', JSON.stringify({ lesson: 0, finished: true }))
     render(<WelcomeApp />)

@@ -38,6 +38,13 @@ no more pointing out winning royal moves (D-46).
 - A Royal Slaughter slices the sacrificed piece in half, with blood, before the king strikes (D-52).
 - Fixed: a piece moving to a later square jumped instead of sliding.
 
+## v0.2.4 (released): the tutorial starts from the basics
+
+- 16 lessons, all on the board. It starts with the king eating its own pieces: when it may (only with
+  no other way out), where it may land, the order (pawns, then knights and bishops, then rooks, then
+  promoted queens) and never the original queen. Then kings capturing kings. The closing page of text
+  became a hands-on lesson (D-53).
+
 ## v0.3: play a friend online
 
 - Invite a friend with a link. Every move is checked by the same engine, running in one Cloudflare

@@ -202,8 +202,10 @@ function LessonStep({
   }, [])
   if (!lesson) return null
   const last = index === LESSONS.length - 1
+  // Pictures that go with a task: under the text on wide screens, after the board on phones.
+  const extra = lesson.task && lesson.diagrams && lesson.diagrams.length > 0 ? lesson.diagrams : null
   return (
-    <article className="lesson" aria-labelledby="lesson-title">
+    <article className={`lesson${extra ? ' lesson--with-extra' : ''}`} aria-labelledby="lesson-title">
       <div className="lesson__text">
         <p className="lesson__count">
           Lesson {index + 1} of {LESSONS.length}
@@ -218,6 +220,11 @@ function LessonStep({
           <p key={paragraph}>{paragraph}</p>
         ))}
       </div>
+      {extra && (
+        <div className="lesson__extra">
+          <LessonDiagrams diagrams={extra} />
+        </div>
+      )}
       <div className="lesson__practice">
         {lesson.task ? (
           <LessonPractice
@@ -228,12 +235,7 @@ function LessonStep({
             onRetry={() => setAttempt((count) => count + 1)}
           />
         ) : (
-          (lesson.diagrams ?? []).map((diagram) => (
-            <figure key={diagram.fen} className="lesson__diagram">
-              <MiniBoard fen={diagram.fen} marks={diagram.marks} label={diagram.caption} />
-              <figcaption>{diagram.caption}</figcaption>
-            </figure>
-          ))
+          <LessonDiagrams diagrams={lesson.diagrams} />
         )}
       </div>
       <nav className="lesson__nav" aria-label="Lessons">
@@ -258,6 +260,39 @@ function LessonStep({
   )
 }
 
+function LessonDiagrams({ diagrams = [] }: { readonly diagrams?: Lesson['diagrams'] }) {
+  return diagrams.map((diagram) => (
+    <figure key={diagram.fen} className="lesson__diagram">
+      <MiniBoard fen={diagram.fen} marks={diagram.marks} label={diagram.caption} />
+      <figcaption>{diagram.caption}</figcaption>
+    </figure>
+  ))
+}
+
+type PracticeResult = 'solved' | 'halfway' | 'replying' | 'answering' | 'punished' | 'retry' | null
+
+/**
+ * Where the lesson stands after the moves so far. The player's moves are at even plies; with a
+ * follow-up, ply 1 is the opponent's forced reply and ply 2 is the player's second move.
+ */
+function practiceResult(task: LessonTask, game: GameState['game']): PracticeResult {
+  const judge = (ply: number, solves: LessonTask['solves']): PracticeResult | 'ok' => {
+    const move = game.moves[ply]
+    const before = game.positions[ply]
+    if (!move || !before) return null
+    if (solves(move, before)) return 'ok'
+    if (move.suicidal !== true) return 'retry'
+    return game.moves.length > ply + 1 ? 'punished' : 'answering'
+  }
+  const first = judge(0, task.solves)
+  if (first !== 'ok') return first
+  if (!task.then) return 'solved'
+  if (game.moves.length === 1) return 'replying'
+  const second = judge(2, task.then.solves)
+  if (second === null) return 'halfway'
+  return second === 'ok' ? 'solved' : second
+}
+
 /** The player's turn on the lesson board; a move into the Kill Zone is answered by the enemy king. */
 function LessonPractice({
   task,
@@ -274,49 +309,45 @@ function LessonPractice({
   const { game } = state
   const position = currentPosition(game)
   const analysis = useMemo(() => analyze(position), [position])
-  const first = game.moves[0]
-  const before = game.positions[0]
-  const result =
-    !first || !before
-      ? null
-      : task.solves(first, before)
-        ? 'solved'
-        : first.suicidal === true
-          ? game.moves.length > 1
-            ? 'punished'
-            : 'answering'
-          : 'retry'
+  const result = practiceResult(task, game)
+  // The second step of a two-step task, once the opponent has replied.
+  const followUp = game.moves.length >= 2 ? task.then : undefined
 
   useEffect(() => {
     if (result === 'solved') onSolved()
   }, [result, onSolved])
 
-  // A move into the Kill Zone: the enemy king answers by taking the player's.
+  // The opponent's turn: after a move into the Kill Zone its king takes the player's; after the
+  // first step of a two-step task it plays its only move.
   useEffect(() => {
-    if (result !== 'answering') return
-    const reply = royalMove(position.board, position.sideToMove)
+    if (result !== 'answering' && result !== 'replying') return
+    const reply =
+      result === 'answering' ? royalMove(position.board, position.sideToMove) : (analysis.legal[0] ?? null)
     if (!reply) return
+    const ply = game.moves.length
     const timer = setTimeout(() => {
-      dispatch({ type: 'computer-move', uci: toUci(reply), ply: 1 })
+      dispatch({ type: 'computer-move', uci: toUci(reply), ply })
     }, 500)
     return () => {
       clearTimeout(timer)
     }
-  }, [result, position])
+  }, [result, position, analysis, game.moves.length])
 
   const feedback =
     result === 'solved'
-      ? { tone: 'success', text: task.success }
+      ? { tone: 'success', text: task.then?.success ?? task.success }
       : result === 'punished'
         ? { tone: 'failure', text: task.punished }
         : result === 'retry'
-          ? { tone: 'hint', text: task.retry }
-          : null
+          ? { tone: 'hint', text: followUp?.retry ?? task.retry }
+          : result === 'halfway' || result === 'replying'
+            ? { tone: 'success', text: task.success }
+            : null
 
   return (
     <>
       <p className="lesson__task">
-        <strong>Your move:</strong> {task.instruction}
+        <strong>Your move:</strong> {followUp?.instruction ?? task.instruction}
       </p>
       <Board
         position={position}
@@ -324,7 +355,7 @@ function LessonPractice({
         selected={state.selected}
         lastMove={game.moves.at(-1) ?? null}
         flipped={state.flipped}
-        interactive={result === null}
+        interactive={result === null || result === 'halfway'}
         transition={state.transition}
         animate={animate}
         onSquare={(square) => {
@@ -371,8 +402,9 @@ function DoneStep({ onOpen }: { readonly onOpen: (index: number) => void }) {
         <p className="hero__eyebrow">Tutorial complete</p>
         <h1 className="hero__title" tabIndex={-1}>You’re ready</h1>
         <p className="hero__lede">
-          That is everything Mean Chess adds to chess. One last thing: during a game nothing on the board warns you about
-          the Kill Zone or tells you when you can win. Watch the kings.
+          That is everything Mean Chess adds to chess. When your king is trapped, the pieces it may eat glow, just as in
+          the lessons. But nothing on the board warns you about the Kill Zone or tells you when you can win: watch the
+          kings.
         </p>
       </header>
       <div className="row tutorial__play">

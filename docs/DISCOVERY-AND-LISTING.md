@@ -357,11 +357,11 @@ Scenario Lab has **deep links today**, so no new demonstration content needs inv
 
 | # | Shows | Link (exists) | Matching tutorial lesson |
 |---|---|---|---|
-| 1 | **Royal Capture**, even while in check | `/play/?scenario=royal-capture-in-check` | "Kings capture kings" |
+| 1 | **Royal Capture**, even while in check | `/play/?scenario=royal-capture-in-check` | "Even when you are in check" |
 | 2 | **Royal Slaughter** | `/play/?scenario=slaughter-pawn` | "Royal Slaughter" |
-| 3 | **Sacrifice hierarchy** | `/play/?scenario=slaughter-blocked` → `slaughter-knight` | "Pawns go first" |
-| 4 | **Royal Cannibalism** | `/play/?scenario=cannibal-back-rank` | "Royal Cannibalism" |
-| 5 | **Fool's mate fails** (the hook for chess players) | `/play/?scenario=fools-mate` | (the "Desperate" lesson covers the rule) |
+| 3 | **Sacrifice hierarchy** | `/play/?scenario=slaughter-blocked` → `slaughter-knight` | "The same order applies" |
+| 4 | **Royal Cannibalism** | `/play/?scenario=cannibal-back-rank` | "Pawns first" |
+| 5 | **Fool's mate fails** (the hook for chess players) | `/play/?scenario=fools-mate` | "Your king can eat its own pieces" (lesson 1 is Fool's mate) |
 
 Optional extras:
 - the Kill Zone ending (`corner-zugzwang`);
@@ -373,7 +373,7 @@ improvement: `/tutorial/?lesson=<id>` deep links, so a post can open a specific 
 ## 13. The traction loop
 
 ```
-community post / listing ──► welcome page ──► tutorial (8 lessons) ──► play the computer
+community post / listing ──► welcome page ──► tutorial (16 lessons) ──► play the computer
         ▲                                                                   │
         │                                                                   ▼
  share a memorable finished game ◄── rematch ◄── game ends ◄── friend joins ◄── "Play a friend online"

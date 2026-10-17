@@ -847,6 +847,14 @@
   gap: 18px 36px;
 }
 
+.lesson--with-extra {
+  grid-template-areas:
+    'text'
+    'practice'
+    'extra'
+    'nav';
+}
+
 @media (min-width: 1000px) {
   .lesson {
     grid-template-columns: minmax(0, 1fr) minmax(0, 600px);
@@ -855,6 +863,14 @@
       'text practice'
       'nav practice';
     align-items: start;
+  }
+
+  .lesson--with-extra {
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'text practice'
+      'extra practice'
+      'nav practice';
   }
 }
 
@@ -939,6 +955,23 @@
 
 .lesson__diagram .mini-board {
   max-width: 320px;
+}
+
+/* A picture that goes with a task: smaller, beside the text (after the board on phones). */
+.lesson__extra {
+  grid-area: extra;
+  display: grid;
+  gap: 12px;
+}
+
+.lesson__extra .lesson__diagram {
+  justify-items: start;
+  font-size: 0.92rem;
+  text-align: left;
+}
+
+.lesson__extra .lesson__diagram .mini-board {
+  max-width: 240px;
 }
 
 .lesson__nav {
