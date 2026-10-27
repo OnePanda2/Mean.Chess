@@ -192,3 +192,24 @@ Claude gives you at A9.
 | Submission delay (Chess Variant Pages) | Submit early; full, well-formatted page | No editor response in 3 weeks | One polite comment on the submission; email an editor after 6 weeks |
 | Spam flag (a new account posting a link) | Founder participates in the community first; one post per venue; disclose that it's your game | Post removed or filtered | Message the mods; don't repost the same text |
 | Platform policy changes (pricing, community rules) | Dated sources; re-check before acting [PHASE-2-SOURCES.md] | Re-check at each stage gate | Adjust the plan; the escape hatch to a Node server (ONLINE-ARCHITECTURE.md §9) |
+
+## A0 spike report (27 October 2026)
+
+Throwaway branch `spike/online` (commit `4140c6f`, not merged): a Worker plus one `GameRoom` Durable
+Object per game, SQLite storage, hibernatable WebSockets and the WebSocket ping auto-response,
+importing `src/engine` unchanged. It was tested locally (`wrangler dev`) and deployed to the founder's
+Free account as `meanchess-spike.onepanda2.workers.dev`, then deleted. The test client played the
+91-ply demo game (ending in a Royal Slaughter) with two sockets. CPU times are from `wrangler tail`.
+
+| Question | Result | Decision |
+|---|---|---|
+| **(1) Restore CPU vs the 10 ms Free limit** | **Replaying the moves fails the budget:** a 91-ply replay cost **15–71 ms** CPU (71 cold, 15 warm), and would grow with longer games. Cloudflare let these requests complete ("ok"), but relying on that is unsafe. **Zero-replay resume costs 0–1 ms**: after every move, store the current position as MeanFEN plus the list of position keys (for threefold), and rebuild with one parse. Ordinary moves cost **1 ms at p50**; one outlier of 12 ms (a cold start). | **Amend P2: adopt the zero-replay resume from the start** (it was the planned fallback). The `moves` table stays, for history and share links; a `snapshot` row holds `fen`, `keys` and the ply. **Finished games are never resumed for play**: the outcome is stored and no snapshot is parsed (a position after a royal win has only one king, which MeanFEN rightly rejects). |
+| **(2) Rate Limiting binding on Free** | **Works.** With a 10-per-minute limit, 10–11 of 15 calls were allowed (approximate, as documented). | Keep the planned `CREATE_LIMIT`, `JOIN_LIMIT` and `CONNECT_LIMIT` bindings; don't treat them as exact. |
+| **(3) Silent-drop detection** | A client that quit abruptly (no close frame) was noticed in **about 1 second** (`webSocketClose`, code 1006). That drop still closed the TCP connection; a truly silent loss (network gone, no FIN) can't be simulated here and may take far longer. | Keep the plan: client heartbeats through the auto-response ping/pong; the client reconnects when pongs stop; the server's absence timers (F2: 120 s) never depend on the close event alone. |
+| **(4) Test harness** | `@cloudflare/vitest-pool-workers` 0.23 needs **Vitest ^4.1**; the repo is on Vitest 5. | **Server integration tests run as Node scripts against `wrangler dev`** (as in the spike), under `npm run test:server`. Pure logic stays under Vitest 5. Revisit when the pool supports Vitest 5. |
+| Deploys and open games | A real new version went live while two sockets were open: **neither dropped within 70 s**, and a fresh connection resumed the game correctly. | Still design for drops (Cloudflare may restart objects on deploy); reconnect plus the 0–1 ms resume covers it. |
+| Compatibility date | Wrangler 4.130's local runtime supports dates up to **2026-09-15** (it refused 2026-10-01). | Use `2026-09-15` (after the 2026-04-07 WebSocket close auto-reply date), or upgrade Wrangler first (4.153 was available). |
+| Size and speed | Bundle **8 KB gzipped**, startup **6 ms**; move round trip **74–76 ms at p50** from India to the nearest Cloudflare location. | Comfortable. |
+
+**Result: the platform is proven on the Free plan, with one amendment (zero-replay resume). A1 can
+start.**
