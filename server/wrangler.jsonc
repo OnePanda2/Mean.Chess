@@ -1,0 +1,53 @@
+// The Mean Chess game server (docs/ONLINE-ARCHITECTURE.md). Deployed by CI; locally: npm run dev:server.
+// Bindings are repeated in every environment: wrangler does not inherit them.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "meanchess-online",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-20",
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  "durable_objects": {
+    "bindings": [
+      { "name": "GAME_ROOM", "class_name": "GameRoom" },
+      { "name": "DAILY_CAPACITY", "class_name": "DailyCapacity" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameRoom", "DailyCapacity"] }],
+  "ratelimits": [
+    { "name": "CREATE_LIMIT", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } },
+    { "name": "JOIN_LIMIT", "namespace_id": "1002", "simple": { "limit": 20, "period": 60 } },
+    { "name": "CONNECT_LIMIT", "namespace_id": "1003", "simple": { "limit": 30, "period": 60 } }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "ONLINE_ENABLED": "true",
+    "ALLOWED_ORIGINS": "https://meanchess.siddheshthapa.com",
+    "DAILY_SOFT_CAP": "80",
+    "DAILY_HARD_CAP": "100",
+    "DAILY_PER_ADDRESS_CAP": "20"
+  },
+  "env": {
+    "staging": {
+      "name": "meanchess-online-staging",
+      "durable_objects": {
+        "bindings": [
+          { "name": "GAME_ROOM", "class_name": "GameRoom" },
+          { "name": "DAILY_CAPACITY", "class_name": "DailyCapacity" }
+        ]
+      },
+      "ratelimits": [
+        { "name": "CREATE_LIMIT", "namespace_id": "2001", "simple": { "limit": 10, "period": 60 } },
+        { "name": "JOIN_LIMIT", "namespace_id": "2002", "simple": { "limit": 20, "period": 60 } },
+        { "name": "CONNECT_LIMIT", "namespace_id": "2003", "simple": { "limit": 30, "period": 60 } }
+      ],
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "ONLINE_ENABLED": "true",
+        "ALLOWED_ORIGINS": "https://meanchess.siddheshthapa.com,http://localhost:5173,http://localhost:4173",
+        "DAILY_SOFT_CAP": "80",
+        "DAILY_HARD_CAP": "100",
+        "DAILY_PER_ADDRESS_CAP": "20"
+      }
+    }
+  }
+}

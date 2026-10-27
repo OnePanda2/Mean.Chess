@@ -11,7 +11,7 @@ const FRAMEWORK_FREE = 'The rules engine and the computer opponent must stay fra
 
 export default defineConfig([
   // Research scripts are throwaway evidence, not product code.
-  globalIgnores(['dist', 'coverage', 'tools/research']),
+  globalIgnores(['dist', 'coverage', 'tools/research', '**/.wrangler']),
 
   {
     files: ['**/*.{js,mjs}'],

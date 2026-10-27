@@ -28,6 +28,9 @@ jobs:
       - run: npm run typecheck
       # Includes the enforced engine coverage thresholds (vitest.config.ts).
       - run: npm run test:coverage
+      # The game server against a real local runtime (wrangler dev): integration tests, and proof that
+      # the pinned Wrangler supports our compatibility date (A0 spike rule).
+      - run: npm run test:server
       - run: npm run build
 
       - if: github.event_name != 'pull_request'

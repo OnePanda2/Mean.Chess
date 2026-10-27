@@ -18,7 +18,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "perft": "node tools/perft.ts",
-    "selfplay": "node tools/selfplay.ts"
+    "selfplay": "node tools/selfplay.ts",
+    "dev:server": "wrangler dev -c server/wrangler.jsonc",
+    "test:server": "node server/test/integration.mjs"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
@@ -29,6 +31,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "5.20261027.1",
     "@eslint/js": "^10.0.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
@@ -47,6 +50,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.1",
     "vite": "^8.3.3",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "wrangler": "4.153.0"
   }
 }
