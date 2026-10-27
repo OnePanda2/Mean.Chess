@@ -13,5 +13,6 @@ export default defineConfig({
     play: resolve(import.meta.dirname, 'play/index.html'),
     tutorial: resolve(import.meta.dirname, 'tutorial/index.html'),
     rules: resolve(import.meta.dirname, 'rules/index.html'),
+    online: resolve(import.meta.dirname, 'online/index.html'),
   },
 })

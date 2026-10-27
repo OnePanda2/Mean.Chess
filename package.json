@@ -20,6 +20,7 @@
     "perft": "node tools/perft.ts",
     "selfplay": "node tools/selfplay.ts",
     "dev:server": "wrangler dev -c server/wrangler.jsonc",
+    "dev:online": "vite --mode online --port 5173 --strictPort",
     "test:server": "node server/test/integration.mjs"
   },
   "dependencies": {

@@ -1006,3 +1006,74 @@
 .link-button:hover {
   color: var(--text);
 }
+
+/* Online play (/online/, OnlineApp.tsx) */
+.online {
+  display: grid;
+  gap: 24px;
+}
+
+.online__create,
+.online__join,
+.online__invited,
+.online__waiting,
+.online__notice {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  max-width: 640px;
+}
+
+.online__link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.online__link input,
+.online__code input {
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+}
+
+.online__code input {
+  width: 14ch;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.online__bigcode {
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+}
+
+.online__game {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 1000px) {
+  .online__game {
+    grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.online__panel {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.online__status {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
