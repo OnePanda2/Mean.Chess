@@ -45,6 +45,23 @@ no more pointing out winning royal moves (D-46).
   promoted queens) and never the original queen. Then kings capturing kings. The closing page of text
   became a hands-on lesson (D-53).
 
+## 1.0.0: online play, and Mean Chess on Google Play (planned)
+
+The founder's decisions of 26 October 2026 (M1–M21, [MOBILE-BLUEPRINT.md](MOBILE-BLUEPRINT.md)):
+- **The store launch is 1.0.0**, for the app and the website together. It includes **online play**
+  (the v0.3 plan below), because the apps wait for it.
+- **Android first** (Google Play). iOS follows once an Apple device is available for enrolment.
+- **New in the apps:**
+  - built from the same code with Capacitor; everything except online play works offline;
+  - haptics, the share sheet, sound effects (on the website too), and a rare "rate us" prompt;
+  - **ads** (a banner on menus; at most one full-screen ad after every 3rd finished game; never
+    during a game; personalised only with consent);
+  - anonymous usage counters.
+
+  The website stays ad-free.
+- **Renumbering:** the releases below keep their content and order, but online play becomes part of
+  1.0.0. Clocks become 1.1, the lobby 1.2, optional accounts 1.3 and ratings 1.4.
+
 ## v0.3: play a friend online
 
 - Invite a friend with a link. Every move is checked by the same engine, running in one Cloudflare
