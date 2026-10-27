@@ -135,6 +135,23 @@ ends.
 
 ## 4. Restoring a game after hibernation or eviction
 
+> **Amended by the A0 spike (27 October 2026; LAUNCH-PLAN.md, spike report).** On the real Free plan a
+> 91-ply replay cost 15–71 ms of CPU, so even the bounded replay below can exceed the 10 ms limit.
+> RoomCore (`server/src/room.ts`) therefore **never replays**. After every move it stores:
+> - `current_fen`;
+> - `position_keys`: a JSON array of the position keys since the last irreversible move, at most
+>   about 100 entries, which is all threefold repetition needs.
+>
+> Restoring is one `parseMeanFen` plus one `JSON.parse` (0–1 ms measured). Other changes:
+> - **`checkpoint_fen` and `checkpoint_ply` are replaced by `position_keys`**;
+> - the row gains `draw_declined_white` and `draw_declined_black` (the ply of each seat's last declined
+>   offer);
+> - finished games are restored without parsing their final position, which can lack a king after a
+>   royal win.
+>
+> The exact columns are `GameRow` in `server/src/room.ts`. The text below is the original design, kept
+> for the record.
+
 The constructor runs again whenever the object wakes [S3]. The Durable Objects FAQ says objects "have the
 same per invocation CPU limits as any Workers do", which is 10 ms on the Free plan [S2][S9]. A full
 replay of a 300-ply game takes 22 ms [M1]. So **replay must be bounded**:

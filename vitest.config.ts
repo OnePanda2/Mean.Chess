@@ -34,6 +34,15 @@ export default defineConfig({
         },
       },
       {
+        // RoomCore: the game room's pure logic (server/src/room.ts), with a fake clock.
+        extends: true,
+        test: {
+          name: 'server',
+          include: ['tests/server/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      {
         extends: true,
         test: {
           name: 'ui',
@@ -47,7 +56,7 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['src/engine/**/*.ts', 'src/ai/**/*.ts', 'src/online/**/*.ts'],
+      include: ['src/engine/**/*.ts', 'src/ai/**/*.ts', 'src/online/**/*.ts', 'server/src/room.ts'],
       thresholds: {
         // docs/BLUEPRINT.md §6.1: the rules engine is the highest-risk code.
         'src/engine/**/*.ts': { lines: 95, functions: 95, statements: 95, branches: 90 },
@@ -56,6 +65,7 @@ export default defineConfig({
         'src/ai/**/*.ts': { lines: 95, functions: 95, statements: 95, branches: 75 },
         // The online protocol: everything that crosses the wire is parsed here (ONLINE-TEST-PLAN.md §2).
         'src/online/**/*.ts': { lines: 95, functions: 95, statements: 95, branches: 90 },
+        'server/src/room.ts': { lines: 95, functions: 95, statements: 95, branches: 90 },
       },
     },
   },

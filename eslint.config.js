@@ -49,7 +49,7 @@ export default defineConfig([
   // clock. The AI and the protocol may use the engine (through src/engine/index.ts); the engine never
   // uses either. The protocol receives randomness as a parameter (src/online/ids.ts).
   {
-    files: ['src/engine/**/*.ts', 'src/ai/**/*.ts', 'src/online/**/*.ts'],
+    files: ['src/engine/**/*.ts', 'src/ai/**/*.ts', 'src/online/**/*.ts', 'server/src/room.ts'],
     languageOptions: { globals: {} },
     rules: {
       'no-restricted-imports': [
