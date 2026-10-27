@@ -45,10 +45,11 @@ export default defineConfig([
     languageOptions: { globals: globals.browser },
   },
 
-  // The engine and computer-opponent boundary: no UI, no DOM, no randomness, no clock. The AI may
-  // use the engine (through src/engine/index.ts); the engine never uses the AI.
+  // The engine, computer-opponent and online-protocol boundary: no UI, no DOM, no randomness, no
+  // clock. The AI and the protocol may use the engine (through src/engine/index.ts); the engine never
+  // uses either. The protocol receives randomness as a parameter (src/online/ids.ts).
   {
-    files: ['src/engine/**/*.ts', 'src/ai/**/*.ts'],
+    files: ['src/engine/**/*.ts', 'src/ai/**/*.ts', 'src/online/**/*.ts'],
     languageOptions: { globals: {} },
     rules: {
       'no-restricted-imports': [
@@ -88,7 +89,7 @@ export default defineConfig([
         {
           patterns: [
             { group: ['react', 'react/*', 'react-dom', 'react-dom/*'], message: FRAMEWORK_FREE },
-            { group: ['**/app/**', '**/components/**', '**/styles/**', '**/ai/**'], message: FRAMEWORK_FREE },
+            { group: ['**/app/**', '**/components/**', '**/styles/**', '**/ai/**', '**/online/**'], message: FRAMEWORK_FREE },
           ],
         },
       ],

@@ -25,6 +25,15 @@ export default defineConfig({
         },
       },
       {
+        // The online protocol is shared by the browser and the game server: plain Node too.
+        extends: true,
+        test: {
+          name: 'online',
+          include: ['tests/online/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      {
         extends: true,
         test: {
           name: 'ui',
@@ -38,13 +47,15 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['src/engine/**/*.ts', 'src/ai/**/*.ts'],
+      include: ['src/engine/**/*.ts', 'src/ai/**/*.ts', 'src/online/**/*.ts'],
       thresholds: {
         // docs/BLUEPRINT.md §6.1: the rules engine is the highest-risk code.
         'src/engine/**/*.ts': { lines: 95, functions: 95, statements: 95, branches: 90 },
         // The computer opponent (docs/AI.md). Its typed-array reads carry `?? 0` guards that strict
         // index checking requires but that can never fire, so branch coverage reads lower than it is.
         'src/ai/**/*.ts': { lines: 95, functions: 95, statements: 95, branches: 75 },
+        // The online protocol: everything that crosses the wire is parsed here (ONLINE-TEST-PLAN.md §2).
+        'src/online/**/*.ts': { lines: 95, functions: 95, statements: 95, branches: 90 },
       },
     },
   },
