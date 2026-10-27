@@ -211,5 +211,16 @@ Free account as `meanchess-spike.onepanda2.workers.dev`, then deleted. The test 
 | Compatibility date | Wrangler 4.130's local runtime supports dates up to **2026-09-15** (it refused 2026-10-01). | Use `2026-09-15` (after the 2026-04-07 WebSocket close auto-reply date), or upgrade Wrangler first (4.153 was available). |
 | Size and speed | Bundle **8 KB gzipped**, startup **6 ms**; move round trip **74–76 ms at p50** from India to the nearest Cloudflare location. | Comfortable. |
 
+**Root causes from the spike, and the rules that prevent them in the real server:**
+- *The local runtime refused the compatibility date:* Wrangler was pinned to an old version (4.130).
+  Wrangler 4.153 runs `2026-10-20` fine. **Rule:** the server uses a current Wrangler (pinned
+  exactly, upgraded deliberately), and CI starts `wrangler dev` once to prove the date is supported.
+- *A thrown error left the client waiting forever:* the spike's message handler didn't catch errors.
+  **Rule:** every `webSocketMessage` path is wrapped. On any error the server replies with a
+  `rejected` or `error` event carrying the request id, logs the error, and never leaves a request
+  unanswered. A test sends a message that throws and expects the reply.
+- *The "failed" log streams were stopped on purpose,* not errors (long-running processes are
+  stopped through the task tool from now on, so their status stays honest).
+
 **Result: the platform is proven on the Free plan, with one amendment (zero-replay resume). A1 can
 start.**
