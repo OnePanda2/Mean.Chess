@@ -55,6 +55,8 @@ export interface OnlineGame {
   readonly meta: OnlineMeta
   readonly connection: ConnectionStatus
   readonly closeReason: CloseReason | null
+  /** When the current spell of reconnecting began (local time), or null while connected. */
+  readonly reconnectingSince: number | null
   /** True while the player's own move waits for the server. */
   readonly pending: boolean
   readonly you: Seat
@@ -97,6 +99,7 @@ export function useOnlineGame({ gameId, token, you, createSocket }: OnlineGameOp
   const [meta, setMeta] = useState<OnlineMeta>(EMPTY_META)
   const [connection, setConnection] = useState<ConnectionStatus>('connecting')
   const [closeReason, setCloseReason] = useState<CloseReason | null>(null)
+  const [reconnectingSince, setReconnectingSince] = useState<number | null>(null)
   const [pending, setPending] = useState<Pending | null>(null)
 
   const connectionRef = useRef<OnlineConnection | null>(null)
@@ -233,6 +236,7 @@ export function useOnlineGame({ gameId, token, you, createSocket }: OnlineGameOp
         onStatus: (status, reason) => {
           setConnection(status)
           setCloseReason(status === 'closed' ? (reason ?? null) : null)
+          setReconnectingSince((since) => (status === 'reconnecting' ? (since ?? Date.now()) : null))
         },
       },
     )
@@ -263,6 +267,7 @@ export function useOnlineGame({ gameId, token, you, createSocket }: OnlineGameOp
     meta,
     connection,
     closeReason,
+    reconnectingSince,
     pending: pending !== null,
     you,
     onSquare: (square) => {

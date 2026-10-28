@@ -12,6 +12,7 @@ import { formatGameId, normalizeGameId, opponentOf, type ColorChoice, type Resul
 import { useAppearance } from './appearance.ts'
 import { createState } from './gameState.ts'
 import { createGame, gameInfo, joinGame, loadSeat, onlineAvailable, pruneSeats, saveSeat, type GameInfo, type SeatGrant } from './online/api.ts'
+import { OFFER_COMPUTER_AFTER_MS, finishAgainstComputer } from './online/handoff.ts'
 import { resultText } from './online/text.ts'
 import { useOnlineGame } from './online/useOnlineGame.ts'
 import { themeById } from './themes.ts'
@@ -372,6 +373,8 @@ function GameScreen({ grant, animate, onNextGame }: { readonly grant: SeatGrant;
   const [confirmResign, setConfirmResign] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const [copied, setCopied] = useState(false)
+  // "Keep waiting" puts the computer offer off for another spell.
+  const [keptWaitingAt, setKeptWaitingAt] = useState(0)
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1_000)
@@ -435,6 +438,8 @@ function GameScreen({ grant, animate, onNextGame }: { readonly grant: SeatGrant;
   const yourTurn = !finished && position.sideToMove === you
   const opponentAway = !finished && meta.presence !== null && !meta.presence.connected[opponent]
   const claimIn = meta.claimableAt === null ? null : Math.max(0, Math.ceil((meta.claimableAt - (now + meta.clockOffset)) / 1_000))
+  const lostSince = online.reconnectingSince
+  const offerComputer = !finished && lostSince !== null && now - Math.max(lostSince, keptWaitingAt) >= OFFER_COMPUTER_AFTER_MS
   return (
     <section className="online__game">
       <div className="online__board">
@@ -458,12 +463,32 @@ function GameScreen({ grant, animate, onNextGame }: { readonly grant: SeatGrant;
         <p className="online__status" role="status">
           {finished && meta.result ? resultText(meta.result, you) : yourTurn ? (online.pending ? 'Sending your move…' : 'Your move') : 'Their move'}
         </p>
-        {online.connection === 'reconnecting' && (
+        {online.connection === 'reconnecting' && !offerComputer && (
           <div className="banner banner--hint">
             <span>Reconnecting…</span>
             <button type="button" className="link-button" onClick={online.retryNow}>
               Retry now
             </button>
+          </div>
+        )}
+        {offerComputer && (
+          <div className="banner banner--hint">
+            <span>The game server can't be reached. Your game is safe there and resumes when it's back.</span>
+            <span className="row">
+              <button
+                type="button"
+                className="button"
+                onClick={() => {
+                  setKeptWaitingAt(Date.now())
+                  online.retryNow()
+                }}
+              >
+                Keep waiting
+              </button>
+              <button type="button" className="button button--primary" onClick={() => finishAgainstComputer(state.game, you)}>
+                Finish this position against the computer
+              </button>
+            </span>
           </div>
         )}
         {opponentAway && (

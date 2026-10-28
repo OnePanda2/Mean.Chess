@@ -23,6 +23,8 @@ export class FakeServer {
   sockets: FakeSocket[] = []
   /** Answer the next create with this error instead (e.g. the capacity guard). */
   nextCreateError: { status: number; body: unknown } | null = null
+  /** While true, new sockets fail to connect (the server is unreachable). */
+  down = false
   private counter = 0
   now = 1_800_000_000_000
 
@@ -150,6 +152,10 @@ export class FakeSocket {
     this.gameId = /\/v1\/games\/([^/]+)\/ws$/.exec(url)?.[1] ?? ''
     server.sockets.push(this)
     queueMicrotask(() => {
+      if (server.down) {
+        this.close(1006)
+        return
+      }
       this.readyState = FakeSocket.OPEN
       this.onopen?.(new Event('open'))
     })

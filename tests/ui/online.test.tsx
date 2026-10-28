@@ -175,4 +175,44 @@ describe('the online page', () => {
     const next = window.location.search.slice(3)
     expect(seatIn(next)).toBe('black')
   })
+
+  it('offers to finish against the computer when the server stays unreachable', async () => {
+    const OnlineApp = await loadApp()
+    const user = userEvent.setup()
+    render(<OnlineApp />)
+    await user.click(screen.getByRole('radio', { name: 'White' }))
+    await user.click(screen.getByRole('button', { name: 'Create invite' }))
+    await screen.findByRole('heading', { name: 'Send this link to your friend' })
+    const gameId = [...server.rooms.keys()][0] ?? ''
+    const friendToken = 'friend'.padEnd(43, 'f')
+    act(() => {
+      server.joinAs(gameId, friendToken)
+    })
+    const friend = scriptedPlayer(gameId, friendToken)
+    await act(async () => {
+      await friend.hello()
+    })
+    await waitFor(() => expect(status()).toBe('Your move'))
+    await user.click(square('e2'))
+    await user.click(square('e4'))
+    await waitFor(() => expect(friend.last()).toMatchObject({ t: 'moved', ply: 1 }))
+
+    // The server goes away: first "Reconnecting…", then after 30 s the computer is offered.
+    server.down = true
+    await act(async () => {
+      server.sockets.find((s) => s !== friend.socket && s.readyState === FakeSocket.OPEN)?.close(1006)
+      await Promise.resolve()
+    })
+    expect(await screen.findByText('Reconnecting…')).toBeTruthy()
+    const realNow = Date.now.bind(Date)
+    const clock = vi.spyOn(Date, 'now').mockImplementation(() => realNow() + 31_000)
+    const finish = await screen.findByRole('button', { name: 'Finish this position against the computer' }, { timeout: 3_000 })
+    expect(screen.getByRole('button', { name: 'Keep waiting' })).toBeTruthy()
+    await user.click(finish)
+    clock.mockRestore()
+
+    // The local board gets exactly this game, against the computer, from White's side.
+    expect(JSON.parse(localStorage.getItem('mean-chess:game:v1') ?? '{}')).toMatchObject({ moves: ['e2e4'] })
+    expect(JSON.parse(localStorage.getItem('mean-chess:opponent:v1') ?? '{}')).toEqual({ kind: 'computer', level: 'nice', human: 'white', auto: true })
+  })
 })
