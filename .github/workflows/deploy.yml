@@ -34,7 +34,10 @@ jobs:
       # Online play end to end: two browsers against the real game server (ONLINE-TEST-PLAN.md §6).
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      # The live site talks to the production game server (dark launch, founder's approval 28 October 2026).
       - run: npm run build
+        env:
+          VITE_ONLINE_URL: https://meanchess-online.onepanda2.workers.dev
 
       - if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v6
@@ -47,7 +50,8 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: verify
+    # The site goes live only after the game server it points at is deployed.
+    needs: [verify, deploy-online-production]
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -64,7 +68,6 @@ jobs:
         uses: actions/deploy-pages@v5
 
   # The game server's private staging Worker (meanchess-online-staging.onepanda2.workers.dev).
-  # Production stays manual until the dark launch (LAUNCH-PLAN.md A9) and the founder's approval.
   deploy-online-staging:
     name: Deploy game server (staging)
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -86,3 +89,26 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+  # The production game server (meanchess-online.onepanda2.workers.dev), after staging took the same build.
+  deploy-online-production:
+    name: Deploy game server (production)
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: deploy-online-staging
+    runs-on: ubuntu-latest
+    concurrency:
+      group: online-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx wrangler deploy -c server/wrangler.jsonc || (sleep 20 && npx wrangler deploy -c server/wrangler.jsonc)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      # Fail the run (and keep the old site) if the new server doesn't answer.
+      - run: for i in 1 2 3 4 5 6; do curl -fsS https://meanchess-online.onepanda2.workers.dev/v1/health && exit 0; sleep 10; done; exit 1
