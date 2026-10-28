@@ -25,6 +25,8 @@ export class FakeServer {
   nextCreateError: { status: number; body: unknown } | null = null
   /** While true, new sockets fail to connect (the server is unreachable). */
   down = false
+  /** The kill switch: creates and joins answer 503 "unavailable". */
+  paused = false
   private counter = 0
   now = 1_800_000_000_000
 
@@ -51,6 +53,7 @@ export class FakeServer {
   private answer(input: string | URL | Request, init?: RequestInit): Response {
     const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url)
     const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
+    if (this.paused && init?.method === 'POST') return json({ error: 'unavailable' }, 503)
     if (url.pathname === '/v1/games' && init?.method === 'POST') {
       if (this.nextCreateError) {
         const { status, body } = this.nextCreateError

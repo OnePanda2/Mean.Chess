@@ -256,4 +256,21 @@ describe('the online page', () => {
     await waitFor(() => expect(status()).toBe('Your move'))
     expect(screen.getByLabelText(/^c6, black knight/)).toBeTruthy()
   })
+
+  it('the kill switch: creating and joining say online play is paused', async () => {
+    const OnlineApp = await loadApp()
+    await server.fetch('https://server.test/v1/games', { method: 'POST', body: JSON.stringify({ protocol: 1, rules: '0.1', color: 'white' }) })
+    const gameId = [...server.rooms.keys()][0] ?? ''
+    server.paused = true
+    const user = userEvent.setup()
+    const home = render(<OnlineApp />)
+    await user.click(screen.getByRole('button', { name: 'Create invite' }))
+    expect(await screen.findByText('Online play is paused right now. Play the computer meanwhile.')).toBeTruthy()
+    home.unmount()
+
+    window.history.replaceState(null, '', `/online/?g=${gameId}`)
+    render(<OnlineApp />)
+    await user.click(await screen.findByRole('button', { name: 'Join game' }))
+    expect(await screen.findByText(/Online play is paused right now\. Your invite still works/)).toBeTruthy()
+  })
 })

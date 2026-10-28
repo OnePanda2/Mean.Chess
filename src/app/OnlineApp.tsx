@@ -312,6 +312,7 @@ function InvitedScreen({
     } else if (answer.error === 'game-full') onGone({ kind: 'others', gameId })
     else if (answer.error === 'game-over' || answer.error === 'not-found') onGone({ kind: 'missing' })
     else if (answer.error === 'rate-limited') setError('Too many attempts. Wait a minute and try again.')
+    else if (answer.error === 'unavailable') setError('Online play is paused right now. Your invite still works when it’s back.')
     else setError("Couldn't reach the game server. Check your connection and try again.")
   }
 
