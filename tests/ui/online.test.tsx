@@ -203,7 +203,9 @@ describe('the online page', () => {
       server.sockets.find((s) => s !== friend.socket && s.readyState === FakeSocket.OPEN)?.close(1006)
       await Promise.resolve()
     })
-    expect(await screen.findByText('Reconnecting…')).toBeTruthy()
+    // A quick blip shows nothing; after 2 s the player is told.
+    expect(screen.queryByText('Reconnecting…')).toBeNull()
+    expect(await screen.findByText('Reconnecting…', undefined, { timeout: 4_000 })).toBeTruthy()
     const realNow = Date.now.bind(Date)
     const clock = vi.spyOn(Date, 'now').mockImplementation(() => realNow() + 31_000)
     const finish = await screen.findByRole('button', { name: 'Finish this position against the computer' }, { timeout: 3_000 })

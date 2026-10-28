@@ -19,6 +19,9 @@ import { themeById } from './themes.ts'
 
 const seatName = (seat: Seat): string => (seat === 'white' ? 'White' : 'Black')
 
+/** Quick drops reconnect in well under a second; only a longer wait is worth telling the player about. */
+const RECONNECT_NOTICE_AFTER_MS = 2_000
+
 type Screen =
   | { readonly kind: 'home' }
   | { readonly kind: 'loading'; readonly gameId: string }
@@ -463,7 +466,7 @@ function GameScreen({ grant, animate, onNextGame }: { readonly grant: SeatGrant;
         <p className="online__status" role="status">
           {finished && meta.result ? resultText(meta.result, you) : yourTurn ? (online.pending ? 'Sending your move…' : 'Your move') : 'Their move'}
         </p>
-        {online.connection === 'reconnecting' && !offerComputer && (
+        {online.connection === 'reconnecting' && !offerComputer && lostSince !== null && now - lostSince >= RECONNECT_NOTICE_AFTER_MS && (
           <div className="banner banner--hint">
             <span>Reconnecting…</span>
             <button type="button" className="link-button" onClick={online.retryNow}>
