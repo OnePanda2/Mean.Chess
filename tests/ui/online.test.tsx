@@ -81,6 +81,10 @@ describe('the online page', () => {
     expect(screen.getByLabelText(/^e5, black king/)).toBeTruthy()
     // The Royal Slaughter: through White's own pawn on e4.
     await user.click(square('e3'))
+    // The Kill Zone is never revealed online either (D-39): the winning capture looks like any move.
+    expect(document.querySelectorAll('.board__hints .hint--win')).toHaveLength(0)
+    expect(screen.queryByText(/Kill Zone|Doomed/)).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Kill zones' })).toBeNull()
     await user.click(square('e5'))
     await waitFor(() => expect(status()).toBe('You win! White wins by Royal Slaughter.'))
     expect(server.rooms.get(gameId)?.result).toEqual({ winner: 'white', reason: 'royal-slaughter' })
