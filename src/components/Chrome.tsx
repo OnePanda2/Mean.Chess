@@ -7,7 +7,7 @@ export function TopBar({
   current,
   onTheme,
 }: {
-  readonly current: 'welcome' | 'play' | 'tutorial' | 'rules'
+  readonly current: 'welcome' | 'play' | 'tutorial' | 'rules' | 'privacy'
   readonly onTheme: () => void
 }) {
   return (
@@ -59,7 +59,8 @@ export function Footer() {
         Mean Chess · Rules v{RULES_VERSION} · An independent chess variant ·{' '}
         <a href={REPOSITORY} rel="noopener noreferrer">
           Open source (MIT)
-        </a>
+        </a>{' '}
+        · <a href="/privacy/">Privacy</a>
       </p>
       <p className="muted">
         Original piece artwork. Display type: Cormorant Garamond, Pacifico, Press Start 2P and Fredoka (SIL Open

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // Served from the root of meanchess.siddheshthapa.com, so base is '/'.
-// Real HTML entry points (welcome, /play/, /tutorial/, /rules/) let GitHub Pages serve every page
+// Real HTML entry points (welcome, /play/, /tutorial/, /rules/, /online/, /privacy/) let GitHub Pages serve every page
 // without a client-side router.
 export default defineConfig({
   base: '/',
@@ -14,5 +14,6 @@ export default defineConfig({
     tutorial: resolve(import.meta.dirname, 'tutorial/index.html'),
     rules: resolve(import.meta.dirname, 'rules/index.html'),
     online: resolve(import.meta.dirname, 'online/index.html'),
+    privacy: resolve(import.meta.dirname, 'privacy/index.html'),
   },
 })

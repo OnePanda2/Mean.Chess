@@ -105,3 +105,14 @@
 .notation-list dd {
   margin: 0;
 }
+
+/* The privacy page (PrivacyApp.tsx) reuses the rules layout as plain reading text. */
+.privacy .rule {
+  display: block;
+  max-width: 72ch;
+}
+
+.privacy .rule p,
+.privacy .rule ul {
+  margin: 0 0 12px;
+}
