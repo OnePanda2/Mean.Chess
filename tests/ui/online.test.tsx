@@ -215,4 +215,43 @@ describe('the online page', () => {
     expect(JSON.parse(localStorage.getItem('mean-chess:game:v1') ?? '{}')).toMatchObject({ moves: ['e2e4'] })
     expect(JSON.parse(localStorage.getItem('mean-chess:opponent:v1') ?? '{}')).toEqual({ kind: 'computer', level: 'nice', human: 'white', auto: true })
   })
+
+  it('a page opened mid-game (a reload) still receives the opponent’s moves', async () => {
+    const OnlineApp = await loadApp()
+    const user = userEvent.setup()
+    const first = render(<OnlineApp />)
+    await user.click(screen.getByRole('radio', { name: 'White' }))
+    await user.click(screen.getByRole('button', { name: 'Create invite' }))
+    await screen.findByRole('heading', { name: 'Send this link to your friend' })
+    const gameId = [...server.rooms.keys()][0] ?? ''
+    const friendToken = 'friend'.padEnd(43, 'f')
+    act(() => {
+      server.joinAs(gameId, friendToken)
+    })
+    const friend = scriptedPlayer(gameId, friendToken)
+    await act(async () => {
+      await friend.hello()
+    })
+    await user.click(square('e2'))
+    await user.click(square('e4'))
+    await act(async () => {
+      friend.move(1, 'd7d5')
+      await Promise.resolve()
+    })
+    await waitFor(() => expect(status()).toBe('Your move'))
+
+    // Reload: the page loads the game from the server's state, then the friend's next move must still show.
+    first.unmount()
+    render(<OnlineApp />)
+    await waitFor(() => expect(status()).toBe('Your move'))
+    await user.click(square('g1'))
+    await user.click(square('f3'))
+    await waitFor(() => expect(friend.last()).toMatchObject({ t: 'moved', ply: 3 }))
+    await act(async () => {
+      friend.move(3, 'b8c6')
+      await Promise.resolve()
+    })
+    await waitFor(() => expect(status()).toBe('Your move'))
+    expect(screen.getByLabelText(/^c6, black knight/)).toBeTruthy()
+  })
 })

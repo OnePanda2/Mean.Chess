@@ -148,7 +148,7 @@ export function useOnlineGame({ gameId, token, you, createSocket }: OnlineGameOp
             } else setPending(null)
           }
           const same = local.moves.length === event.moves.length && event.moves.every((uci, i) => uciOf(local, i) === uci)
-          if (!same) dispatch({ type: 'load', game, scenario: null })
+          if (!same) dispatch({ type: 'load', game, scenario: null, keepOpponent: true })
           return
         }
         case 'moved': {
@@ -191,7 +191,7 @@ export function useOnlineGame({ gameId, token, you, createSocket }: OnlineGameOp
         case 'rejected': {
           if (event.of === 'move' && pendingRef.current && (!event.mid || event.mid === pendingRef.current.mid)) {
             setPending(null)
-            if (serverGame.current) dispatch({ type: 'load', game: serverGame.current, scenario: null })
+            if (serverGame.current) dispatch({ type: 'load', game: serverGame.current, scenario: null, keepOpponent: true })
           }
           return
         }

@@ -21,6 +21,7 @@
     "selfplay": "node tools/selfplay.ts",
     "dev:server": "wrangler dev -c server/wrangler.jsonc",
     "dev:online": "vite --mode online --port 5173 --strictPort",
+    "test:e2e": "playwright test",
     "test:server": "node server/test/integration.mjs"
   },
   "dependencies": {
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "5.20261027.1",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.64.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",

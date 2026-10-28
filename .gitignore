@@ -31,3 +31,7 @@ Thumbs.db
 
 # Wrangler (Cloudflare) local build output and state
 .wrangler/
+
+# Playwright output
+test-results/
+playwright-report/

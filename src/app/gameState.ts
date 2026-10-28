@@ -61,7 +61,8 @@ export type GameAction =
   | { readonly type: 'deselect' }
   | { readonly type: 'undo' }
   | { readonly type: 'start'; readonly opponent: Opponent }
-  | { readonly type: 'load'; readonly game: GameRecord; readonly scenario: Scenario | null }
+  /** `keepOpponent`: the online page reloads the server's game but keeps who plays which side. */
+  | { readonly type: 'load'; readonly game: GameRecord; readonly scenario: Scenario | null; readonly keepOpponent?: boolean }
   | { readonly type: 'resign' }
   | { readonly type: 'agree-draw' }
   | { readonly type: 'flip' }
@@ -185,7 +186,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         transition: next(state, 'reset'),
       }
     case 'load':
-      // A loaded position or scenario is explored by one person playing both sides.
+      // A loaded position or scenario is explored by one person playing both sides (not online).
       return {
         ...state,
         game: action.game,
@@ -193,7 +194,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         selected: null,
         promotion: null,
         scenario: action.scenario,
-        opponent: FRIEND,
+        opponent: action.keepOpponent === true ? state.opponent : FRIEND,
         drawDeclinedAt: null,
         transition: next(state, 'reset'),
       }
